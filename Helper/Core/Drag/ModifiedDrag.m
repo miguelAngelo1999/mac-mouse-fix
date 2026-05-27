@@ -33,6 +33,7 @@
 #import "ModifiedDragOutputAddMode.h"
 #import "ModifiedDragOutputVolumeBrightness.h"
 #import "ModifiedDragOutputWindowMove.h"
+#import "ModifiedDragOutputRotateZoom.h"
 
 #import "GlobalEventTapThread.h"
 
@@ -182,6 +183,10 @@ static ModifiedDragState _drag;
             p = (id<ModifiedDragOutputPlugin>)ModifiedDragOutputVolumeBrightness.class;
         } else if ([type isEqualToString:kMFModifiedDragTypeWindowMove]) {
             p = (id<ModifiedDragOutputPlugin>)ModifiedDragOutputWindowMove.class;
+        } else if ([type isEqualToString:kMFModifiedDragTypeRotate]) {
+            p = (id<ModifiedDragOutputPlugin>)ModifiedDragOutputRotateZoom.class;
+        } else if ([type isEqualToString:kMFModifiedDragTypeZoom]) {
+            p = (id<ModifiedDragOutputPlugin>)ModifiedDragOutputRotateZoom.class;
         } else {
             assert(false);
         }
