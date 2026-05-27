@@ -5,6 +5,18 @@
 /* First draft: Content tracks finger movement */
 "natural-scrolling-hint" = "손가락이 움직임이는 방향에 따라 콘텐츠가 이동됩니다.";
 
+/* Rotate */
+"drag-effect.rotate" = "drag-effect.rotate";
+
+/* Rotate content in Apple Maps and other apps by moving your mouse left and right\n \nWorks like twisting with 2 fingers on an Apple Trackpad */
+"drag-effect.rotate.hint" = "drag-effect.rotate.hint";
+
+/* Zoom In or Out */
+"drag-effect.zoom" = "drag-effect.zoom";
+
+/* Zoom in or out by moving your mouse up and down\n \nWorks like pinching with 2 fingers on an Apple Trackpad */
+"drag-effect.zoom.hint" = "drag-effect.zoom.hint";
+
 /* First draft: Open 'Security & Privacy' Preferences || Notes: The string for Ventura and later is defined in Interface Builder */
 "accessibility.settings-link.pre-ventura" = "'보안 및 개인 정보 보호' 설정 열기";
 
@@ -154,6 +166,12 @@
 
 /* First draft: Move your mouse:\n - Up to show Mission Control\n - Down to show Application Windows\n - Left or Right to move between Spaces\n \nWorks like swiping with 3 fingers on an Apple Trackpad */
 "drag-effect.dock-swipe.hint" = "마우스를 움직여 다음 동작을 수행합니다.:\n - 위로 올리면 Mission Control을 엽니다.\n - 아래로 내리면 현재 앱에 대해 열린 모든 윈도우를 보여줍니다.\n - 좌우로 움직이면 생성한 Spaces 사이를 이동합니다.\n \n이는 Apple 트랙패드에서 세 손가락으로 스와이프하는 것과 같습니다.";
+
+/* Rotate & Zoom */
+"drag-effect.rotate-zoom" = "drag-effect.rotate-zoom";
+
+/* Move left/right to rotate, move up/down to zoom\n \nHold Shift while rotating to snap to 90° steps\n \nWorks in Apple Maps, Photos, Preview and other apps */
+"drag-effect.rotate-zoom.hint" = "drag-effect.rotate-zoom.hint";
 
 /* First draft: Scroll & Navigate */
 "drag-effect.scroll-swipe" = "스크롤 및 탐색";

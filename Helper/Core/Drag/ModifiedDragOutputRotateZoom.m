@@ -10,42 +10,70 @@
 #import "TouchSimulator.h"
 #import "Constants.h"
 #import "IOHIDEventTypes.h"
+#import <CoreGraphics/CoreGraphics.h>
 
 @implementation ModifiedDragOutputRotateZoom
 
 #pragma mark - Vars
 
 static ModifiedDragState *_drag;
-static BOOL _isFirstCallback;
+static BOOL _rotateStarted;
+static BOOL _zoomStarted;
+static double _rotationAccumulator; /// Accumulated rotation for snap mode
 
 #pragma mark - Interface
 
 + (void)initializeWithDragState:(ModifiedDragState *)dragStateRef {
     _drag = dragStateRef;
-    _isFirstCallback = YES;
+    _rotateStarted = NO;
+    _zoomStarted = NO;
+    _rotationAccumulator = 0.0;
 }
 
 + (void)handleBecameInUse {
-    _isFirstCallback = YES;
+    _rotateStarted = NO;
+    _zoomStarted = NO;
+    _rotationAccumulator = 0.0;
 }
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
     
-    IOHIDEventPhaseBits phase = _isFirstCallback ? kIOHIDEventPhaseBegan : kIOHIDEventPhaseChanged;
-    _isFirstCallback = NO;
+    /// Check if Shift is held (for 90° snap mode)
+    CGEventFlags flags = CGEventGetFlags(event);
+    BOOL shiftHeld = (flags & kCGEventFlagMaskShift) != 0;
     
-    BOOL isRotate = [_drag->type isEqualToString:kMFModifiedDragTypeRotate];
-    
-    if (isRotate) {
-        /// Horizontal mouse movement → rotation
-        /// Scale: ~400px = full 360° rotation (but in practice small movements are used)
-        double rotation = deltaX / 8.0;
-        [TouchSimulator postRotationEventWithRotation:rotation phase:phase];
-    } else {
-        /// Vertical mouse movement → zoom (pinch)
-        /// Moving up (negative deltaY) = zoom in, moving down = zoom out
+    /// --- Zoom: vertical movement (up = zoom in, down = zoom out) ---
+    if (fabs(deltaY) > 0) {
+        IOHIDEventPhaseBits zoomPhase = _zoomStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
+        _zoomStarted = YES;
         double magnification = -deltaY / 400.0;
-        [TouchSimulator postMagnificationEventWithMagnification:magnification phase:phase];
+        [TouchSimulator postMagnificationEventWithMagnification:magnification phase:zoomPhase];
+    }
+    
+    /// --- Rotate: horizontal movement (left/right) ---
+    if (fabs(deltaX) > 0) {
+        double rotation = deltaX / 8.0;
+        
+        if (shiftHeld) {
+            /// Snap mode: accumulate rotation and only fire at 90° boundaries
+            _rotationAccumulator += rotation;
+            double snapStep = 90.0; /// degrees
+            
+            if (fabs(_rotationAccumulator) >= snapStep) {
+                double snappedRotation = ((_rotationAccumulator > 0) ? snapStep : -snapStep);
+                _rotationAccumulator = fmod(_rotationAccumulator, snapStep);
+                
+                IOHIDEventPhaseBits phase = _rotateStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
+                _rotateStarted = YES;
+                [TouchSimulator postRotationEventWithRotation:snappedRotation phase:phase];
+            }
+        } else {
+            /// Free rotation
+            _rotationAccumulator = 0.0;
+            IOHIDEventPhaseBits phase = _rotateStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
+            _rotateStarted = YES;
+            [TouchSimulator postRotationEventWithRotation:rotation phase:phase];
+        }
     }
 }
 
@@ -53,15 +81,16 @@ static BOOL _isFirstCallback;
     
     IOHIDEventPhaseBits endPhase = cancel ? kIOHIDEventPhaseCancelled : kIOHIDEventPhaseEnded;
     
-    BOOL isRotate = [_drag->type isEqualToString:kMFModifiedDragTypeRotate];
-    
-    if (isRotate) {
-        [TouchSimulator postRotationEventWithRotation:0 phase:endPhase];
-    } else {
+    if (_zoomStarted) {
         [TouchSimulator postMagnificationEventWithMagnification:0 phase:endPhase];
     }
+    if (_rotateStarted) {
+        [TouchSimulator postRotationEventWithRotation:0 phase:endPhase];
+    }
     
-    _isFirstCallback = YES;
+    _rotateStarted = NO;
+    _zoomStarted = NO;
+    _rotationAccumulator = 0.0;
 }
 
 + (void)suspend {

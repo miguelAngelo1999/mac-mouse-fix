@@ -14,6 +14,18 @@
 /* No comment provided by engineer. */
 "Vanilla" = "香草";
 
+/* Rotate */
+"drag-effect.rotate" = "drag-effect.rotate";
+
+/* Rotate content in Apple Maps and other apps by moving your mouse left and right\n \nWorks like twisting with 2 fingers on an Apple Trackpad */
+"drag-effect.rotate.hint" = "drag-effect.rotate.hint";
+
+/* Zoom In or Out */
+"drag-effect.zoom" = "drag-effect.zoom";
+
+/* Zoom in or out by moving your mouse up and down\n \nWorks like pinching with 2 fingers on an Apple Trackpad */
+"drag-effect.zoom.hint" = "drag-effect.zoom.hint";
+
 /* First draft: Open 'Security & Privacy' Preferences || Notes: The string for Ventura and later is defined in Interface Builder */
 "accessibility.settings-link.pre-ventura" = "開啟「私隱與保安」偏好設定";
 
@@ -163,6 +175,12 @@
 
 /* First draft: Move your mouse:\n - Up to show Mission Control\n - Down to show Application Windows\n - Left or Right to move between Spaces\n \nWorks like swiping with 3 fingers on an Apple Trackpad */
 "drag-effect.dock-swipe.hint" = "移動你的滑鼠：\n・向上來顯示指揮中心\n・向下來顯示應用程式視窗\n・向左或向右來切換「空間」\n \n作用相當於在Apple觸控板上用三指滑動";
+
+/* Rotate & Zoom */
+"drag-effect.rotate-zoom" = "drag-effect.rotate-zoom";
+
+/* Move left/right to rotate, move up/down to zoom\n \nHold Shift while rotating to snap to 90° steps\n \nWorks in Apple Maps, Photos, Preview and other apps */
+"drag-effect.rotate-zoom.hint" = "drag-effect.rotate-zoom.hint";
 
 /* First draft: Scroll & Navigate */
 "drag-effect.scroll-swipe" = "捲動與導覽";

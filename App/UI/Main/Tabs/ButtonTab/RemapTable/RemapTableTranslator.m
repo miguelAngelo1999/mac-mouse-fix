@@ -132,11 +132,8 @@ static NSArray *getDragEffectsTable() {
                   kMFModifiedDragDictKeyType: kMFModifiedDragTypeTwoFingerSwipe,
         }},
         separatorEffectsTableEntry(),
-        @{@"ui": NSLocalizedString(@"drag-effect.rotate", @"Rotate"), @"tool": NSLocalizedString(@"drag-effect.rotate.hint", @"Rotate content in Apple Maps and other apps by moving your mouse left and right\n \nWorks like twisting with 2 fingers on an Apple Trackpad"), @"dict": @{
-                  kMFModifiedDragDictKeyType: kMFModifiedDragTypeRotate,
-        }},
-        @{@"ui": NSLocalizedString(@"drag-effect.zoom", @"Zoom In or Out"), @"tool": NSLocalizedString(@"drag-effect.zoom.hint", @"Zoom in or out by moving your mouse up and down\n \nWorks like pinching with 2 fingers on an Apple Trackpad"), @"dict": @{
-                  kMFModifiedDragDictKeyType: kMFModifiedDragTypeZoom,
+        @{@"ui": NSLocalizedString(@"drag-effect.rotate-zoom", @"Rotate & Zoom"), @"tool": NSLocalizedString(@"drag-effect.rotate-zoom.hint", @"Move left/right to rotate, move up/down to zoom\n \nHold Shift while rotating to snap to 90° steps\n \nWorks in Apple Maps, Photos, Preview and other apps"), @"dict": @{
+                  kMFModifiedDragDictKeyType: kMFModifiedDragTypeRotateZoom,
         }},
 //        separatorEffectsTableEntry(),
 //        @{
@@ -165,6 +162,10 @@ static NSArray *getDragEffectsTable() {
         separatorEffectsTableEntry(),
         @{@"ui": NSLocalizedString(@"drag-effect.window-move", @"Move Window"), @"tool": NSLocalizedString(@"drag-effect.window-move.hint", @"Move the window under the cursor by dragging your mouse\n \nHold the button and move your mouse to reposition any window"), @"dict": @{
                   kMFModifiedDragDictKeyType: kMFModifiedDragTypeWindowMove,
+        }},
+        separatorEffectsTableEntry(),
+        @{@"ui": NSLocalizedString(@"drag-effect.rotate-zoom", @"Rotate & Zoom"), @"tool": NSLocalizedString(@"drag-effect.rotate-zoom.hint", @"Move left/right to rotate, move up/down to zoom\n \nHold Shift while rotating to snap to 90° steps\n \nWorks in Apple Maps, Photos, Preview and other apps"), @"dict": @{
+                  kMFModifiedDragDictKeyType: kMFModifiedDragTypeRotateZoom,
         }},
     ];
     return dragEffectsTable;
