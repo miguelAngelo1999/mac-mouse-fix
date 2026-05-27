@@ -94,7 +94,7 @@ class AboutTabController: NSViewController {
         let versionFormat = NSLocalizedString("app-version", comment: "First draft: Version %@ || Note: %@ will be replaced by the app version, e.g. '3.0.0 (22027)'")
         let versionFormatExists = versionFormat.count != 0 && versionFormat != "app-version"
         let versionNumbers = "\(Locator.bundleVersionShort()) (\(Locator.bundleVersion()))"
-        versionField.stringValue = versionFormatExists ? String(format: versionFormat, versionNumbers) : versionNumbers
+        versionField.stringValue = (versionFormatExists ? String(format: versionFormat, versionNumbers) : versionNumbers) + "\nMichaelAngelo's fork"
         
         /// Init trialSectionManager
         ///     The manager swaps out the trialSection and stuff, so always access the trialSection through the manager!
