@@ -10,7 +10,6 @@
 #import "TouchSimulator.h"
 #import "Constants.h"
 #import "IOHIDEventTypes.h"
-#import "PointerFreeze.h"
 #import "Mac_Mouse_Fix_Helper-Swift.h"
 #import <CoreGraphics/CoreGraphics.h>
 
@@ -37,8 +36,10 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
     _zoomStarted = NO;
     _rotationAccumulator = 0.0;
     
-    /// Freeze pointer in place — always freeze for rotate/zoom (no reason to let it move)
-    [PointerFreeze freezePointerAtPosition:_drag->usageOrigin];
+    /// Disconnect mouse from cursor — gives truly infinite movement in all directions
+    /// The cursor stays frozen and deltas never stop at screen edges
+    CGAssociateMouseAndMouseCursorPosition(false);
+    CGDisplayHideCursor(kCGNullDirectDisplay);
 }
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
@@ -47,22 +48,13 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
     CGEventFlags flags = CGEventGetFlags(event);
     BOOL shiftHeld = (flags & kCGEventFlagMaskShift) != 0;
     
-    /// Determine dominant axis — only one gesture type per event
-    BOOL useRotation = fabs(deltaX) > fabs(deltaY);
+    /// Both axes work simultaneously — no dominant axis locking
     
-    if (useRotation) {
-        /// --- Rotate: horizontal movement (left/right) ---
-        
-        /// End zoom gesture if it was active
-        if (_zoomStarted) {
-            [TouchSimulator postMagnificationEventWithMagnification:0 phase:kIOHIDEventPhaseEnded];
-            _zoomStarted = NO;
-        }
-        
-        double rotation = deltaX / 4.0; /// More sensitive than /8.0
+    /// --- Rotate: horizontal movement (left/right) ---
+    if (fabs(deltaX) > 0.5) {
+        double rotation = deltaX / 4.0;
         
         if (shiftHeld) {
-            /// Snap mode: accumulate rotation and only fire at 90° boundaries
             _rotationAccumulator += rotation;
             double snapStep = 90.0;
             
@@ -75,23 +67,15 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
                 [TouchSimulator postRotationEventWithRotation:snappedRotation phase:phase];
             }
         } else {
-            /// Free rotation
             _rotationAccumulator = 0.0;
             IOHIDEventPhaseBits phase = _rotateStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
             _rotateStarted = YES;
             [TouchSimulator postRotationEventWithRotation:rotation phase:phase];
         }
-        
-    } else if (fabs(deltaY) > 0) {
-        /// --- Zoom: vertical movement (up = zoom in, down = zoom out) ---
-        
-        /// End rotate gesture if it was active
-        if (_rotateStarted) {
-            [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
-            _rotateStarted = NO;
-            _rotationAccumulator = 0.0;
-        }
-        
+    }
+    
+    /// --- Zoom: vertical movement (up = zoom in, down = zoom out) ---
+    if (fabs(deltaY) > 0.5) {
         IOHIDEventPhaseBits zoomPhase = _zoomStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
         _zoomStarted = YES;
         double magnification = -deltaY / 400.0;
@@ -114,8 +98,9 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
     _zoomStarted = NO;
     _rotationAccumulator = 0.0;
     
-    /// Unfreeze pointer
-    [PointerFreeze unfreeze];
+    /// Reconnect mouse to cursor and show it
+    CGAssociateMouseAndMouseCursorPosition(true);
+    CGDisplayShowCursor(kCGNullDirectDisplay);
 }
 
 + (void)suspend {
