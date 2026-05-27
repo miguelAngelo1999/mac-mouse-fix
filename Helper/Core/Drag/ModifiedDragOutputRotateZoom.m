@@ -10,6 +10,7 @@
 #import "TouchSimulator.h"
 #import "Constants.h"
 #import "IOHIDEventTypes.h"
+#import "PointerFreeze.h"
 #import "Mac_Mouse_Fix_Helper-Swift.h"
 #import <CoreGraphics/CoreGraphics.h>
 
@@ -36,10 +37,9 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
     _zoomStarted = NO;
     _rotationAccumulator = 0.0;
     
-    /// Disconnect mouse from cursor — gives truly infinite movement in all directions
-    /// The cursor stays frozen and deltas never stop at screen edges
-    CGAssociateMouseAndMouseCursorPosition(false);
-    CGDisplayHideCursor(kCGNullDirectDisplay);
+    /// Freeze pointer — PointerFreeze warps cursor back to origin on each event,
+    /// so it never reaches screen edges and deltas never stop.
+    [PointerFreeze freezePointerAtPosition:_drag->usageOrigin];
 }
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
@@ -52,7 +52,7 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
     
     /// --- Rotate: horizontal movement (left/right) ---
     if (fabs(deltaX) > 0.5) {
-        double rotation = deltaX / 4.0;
+        double rotation = deltaX / 20.0; /// Small increments — real trackpad sends ~0.5-2° per frame
         
         if (shiftHeld) {
             _rotationAccumulator += rotation;
@@ -98,9 +98,8 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
     _zoomStarted = NO;
     _rotationAccumulator = 0.0;
     
-    /// Reconnect mouse to cursor and show it
-    CGAssociateMouseAndMouseCursorPosition(true);
-    CGDisplayShowCursor(kCGNullDirectDisplay);
+    /// Unfreeze pointer
+    [PointerFreeze unfreeze];
 }
 
 + (void)suspend {
