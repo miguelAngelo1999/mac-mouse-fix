@@ -500,6 +500,12 @@
 /* Smoothly adjust system volume\n \nScroll up to increase, scroll down to decrease */
 "scroll-effect.volume.hint" = "scroll-effect.volume.hint";
 
+/* Resize Window */
+"scroll-effect.window-resize" = "scroll-effect.window-resize";
+
+/* Resize the window under the cursor by scrolling\n \nScroll up to make bigger, scroll down to make smaller */
+"scroll-effect.window-resize.hint" = "scroll-effect.window-resize.hint";
+
 /* First draft: Zoom In or Out */
 "scroll-effect.zoom" = "放大或缩小";
 

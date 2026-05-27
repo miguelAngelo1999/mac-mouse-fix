@@ -491,6 +491,12 @@
 /* Smoothly adjust system volume\n \nScroll up to increase, scroll down to decrease */
 "scroll-effect.volume.hint" = "Smoothly adjust system volume\n \nScroll up to increase, scroll down to decrease";
 
+/* Resize Window */
+"scroll-effect.window-resize" = "Resize Window";
+
+/* Resize the window under the cursor by scrolling\n \nScroll up to make bigger, scroll down to make smaller */
+"scroll-effect.window-resize.hint" = "Resize the window under the cursor by scrolling\n \nScroll up to make bigger, scroll down to make smaller";
+
 /* First draft: Zoom In or Out */
 "scroll-effect.zoom" = "Zoom In or Out";
 
@@ -640,7 +646,3 @@
 
 /* First draft: Type a Keyboard Shortcut */
 "type-shortcut-prompt" = "Type a Keyboard Shortcut";
-
-/* Window resize scroll effect */
-"scroll-effect.window-resize" = "Resize Window";
-"scroll-effect.window-resize.hint" = "Resize the window under the cursor by scrolling\n \nScroll up to make bigger, scroll down to make smaller";
