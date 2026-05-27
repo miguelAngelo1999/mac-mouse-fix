@@ -37,12 +37,8 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
     _zoomStarted = NO;
     _rotationAccumulator = 0.0;
     
-    /// Freeze pointer in place so it doesn't hit screen edges
-    if (GeneralConfig.freezePointerDuringModifiedDrag) {
-        [PointerFreeze freezePointerAtPosition:_drag->usageOrigin];
-    } else {
-        [PointerFreeze freezeEventDispatchPointAtPosition:_drag->usageOrigin];
-    }
+    /// Freeze pointer in place — always freeze for rotate/zoom (no reason to let it move)
+    [PointerFreeze freezePointerAtPosition:_drag->usageOrigin];
 }
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
