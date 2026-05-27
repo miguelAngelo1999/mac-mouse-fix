@@ -278,6 +278,18 @@
 /* First draft: Zoom in or out in Safari and other apps.\n \nWorks like a two-finger double tap on an Apple Trackpad. */
 "effect.smart-zoom.hint" = "在Safari和其他應用程式中放大或縮小。\n \n作用相當於在Apple觸控式軌跡板上用兩指點兩下";
 
+/* Stop Scroll */
+"effect.stop-scroll" = "effect.stop-scroll";
+
+/* Instantly stop any ongoing scroll momentum\n \nLike touching the trackpad surface to stop a page from coasting */
+"effect.stop-scroll.hint" = "effect.stop-scroll.hint";
+
+/* Toggle Mac Mouse Fix */
+"effect.toggle-mmf" = "effect.toggle-mmf";
+
+/* Temporarily disable all Mac Mouse Fix features\n \nPress again to re-enable. Useful for gaming. */
+"effect.toggle-mmf.hint" = "effect.toggle-mmf.hint";
+
 /* First draft: If you have **problems enabling** the app, click&nbsp;[here](https://github.com/noah-nuebling/mac-mouse-fix/discussions/861). */
 "enable-timeout-toast" = "enable-timeout-toast";
 

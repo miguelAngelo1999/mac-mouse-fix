@@ -269,6 +269,18 @@
 /* First draft: Zoom in or out in Safari and other apps.\n \nWorks like a two-finger double tap on an Apple Trackpad. */
 "effect.smart-zoom.hint" = "Zoom in or out in Safari and other apps.\n \nWorks like a two-finger double tap on an Apple Trackpad.";
 
+/* Stop Scroll */
+"effect.stop-scroll" = "Stop Scroll";
+
+/* Instantly stop any ongoing scroll momentum\n \nLike touching the trackpad surface to stop a page from coasting */
+"effect.stop-scroll.hint" = "Instantly stop any ongoing scroll momentum\n \nLike touching the trackpad surface to stop a page from coasting";
+
+/* Toggle Mac Mouse Fix */
+"effect.toggle-mmf" = "Toggle Mac Mouse Fix";
+
+/* Temporarily disable all Mac Mouse Fix features\n \nPress again to re-enable. Useful for gaming. */
+"effect.toggle-mmf.hint" = "Temporarily disable all Mac Mouse Fix features\n \nPress again to re-enable. Useful for gaming.";
+
 /* First draft: If you have **problems enabling** the app, click&nbsp;[here](https://github.com/noah-nuebling/mac-mouse-fix/discussions/861). */
 "enable-timeout-toast" = "If you have **problems enabling** the app, click&nbsp;[here](https://github.com/noah-nuebling/mac-mouse-fix/discussions/861).";
 
@@ -622,7 +634,3 @@
 
 /* First draft: Type a Keyboard Shortcut */
 "type-shortcut-prompt" = "Type a Keyboard Shortcut";
-
-/* Stop scroll action */
-"effect.stop-scroll" = "Stop Scroll";
-"effect.stop-scroll.hint" = "Instantly stop any ongoing scroll momentum\n \nLike touching the trackpad surface to stop a page from coasting";

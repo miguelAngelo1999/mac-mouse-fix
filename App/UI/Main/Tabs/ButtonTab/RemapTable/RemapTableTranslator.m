@@ -172,6 +172,9 @@ static NSArray *getOneShotEffectsTable(NSDictionary *rowDict) {
         @{@"ui": NSLocalizedString(@"effect.stop-scroll", @"Stop Scroll"), @"tool": NSLocalizedString(@"effect.stop-scroll.hint", @"Instantly stop any ongoing scroll momentum\n \nLike touching the trackpad surface to stop a page from coasting"), @"dict": @{
                   kMFActionDictKeyType: kMFActionDictTypeStopScroll,
         }},
+        @{@"ui": NSLocalizedString(@"effect.toggle-mmf", @"Toggle Mac Mouse Fix"), @"tool": NSLocalizedString(@"effect.toggle-mmf.hint", @"Temporarily disable all Mac Mouse Fix features\n \nPress again to re-enable. Useful for gaming."), @"dict": @{
+                  kMFActionDictKeyType: kMFActionDictTypeToggleMMF,
+        }},
         @{@"ui": NSLocalizedString(@"effect.primary-click", @"First draft: Primary Click"),
           @"tool": stringf(NSLocalizedString(@"effect.primary-click.hint", @"First draft: Works like clicking %@ on a standard mouse."), [UIStrings getButtonStringToolTip:1]),
           @"hideable": @YES,
