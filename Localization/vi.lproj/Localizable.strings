@@ -137,6 +137,18 @@
 /* First draft: Learn More */
 "capture-toast.link" = "Đọc thêm";
 
+/* Brightness */
+"drag-effect.brightness" = "drag-effect.brightness";
+
+/* Brightness (Horizontal) */
+"drag-effect.brightness-horizontal" = "drag-effect.brightness-horizontal";
+
+/* Smoothly adjust display brightness by moving your mouse left and right\n \nMove right to increase, move left to decrease */
+"drag-effect.brightness-horizontal.hint" = "drag-effect.brightness-horizontal.hint";
+
+/* Smoothly adjust display brightness by moving your mouse up and down\n \nMove up to increase, move down to decrease */
+"drag-effect.brightness.hint" = "drag-effect.brightness.hint";
+
 /* First draft: Spaces & Mission Control */
 "drag-effect.dock-swipe" = "Spaces & Mission Control"; //!IS_OK
 
@@ -148,6 +160,18 @@
 
 /* First draft: Scroll freely by moving your mouse in any direction\n \nAlso Navigate between pages in Safari, delete messages in Mail and more by moving your mouse left and right\n \nWorks like swiping with 2 fingers on an Apple Trackpad */
 "drag-effect.scroll-swipe.hint" = "Lăn tự do bằng cách di chuyển chuột theo các hướng bất kỳ\n \nCũng có thể điều hướng giữa các trang trong Safari, xóa các mẫu tin trong Mail và nhiều thứ khác bằng cách di chuyển chuột qua trái hoặc phải. \n \nHoạt động như vuốt 2 ngón tay trên Apple Trackpad";
+
+/* Volume */
+"drag-effect.volume" = "drag-effect.volume";
+
+/* Volume (Horizontal) */
+"drag-effect.volume-horizontal" = "drag-effect.volume-horizontal";
+
+/* Smoothly adjust system volume by moving your mouse left and right\n \nMove right to increase, move left to decrease */
+"drag-effect.volume-horizontal.hint" = "drag-effect.volume-horizontal.hint";
+
+/* Smoothly adjust system volume by moving your mouse up and down\n \nMove up to increase, move down to decrease */
+"drag-effect.volume.hint" = "drag-effect.volume.hint";
 
 /* First draft: Application Windows || Note: Under macOS Sonoma, this feature is called 'App Exposé' in Trackpad settings, but 'Application Windows' in Keyboard Shortcut settings and all other places I found. */
 "effect.app-expose" = "Duyệt các ứng dụng đang mở";
@@ -338,6 +362,18 @@
 /* First draft: Shift (⇧) */
 "modifer-key.tool.shift" = "Shift (⇧)"; //!IS_OK
 
+/* Hard Stop (Free Spin) */
+"momentum-arrest.deceleration" = "momentum-arrest.deceleration";
+
+/* Direction Change */
+"momentum-arrest.direction-change" = "momentum-arrest.direction-change";
+
+/* Stop: */
+"momentum-arrest.label" = "momentum-arrest.label";
+
+/* Off */
+"momentum-arrest.off" = "momentum-arrest.off";
+
 /* First draft: Scroll precisely, even without a keyboard modifier,\nbymoving the scroll wheel _slowly_ || Note: The line break (\n) is there so the layout of the Scroll tab doesn't become too wide which looks weird. You can set it to your own taste. */
 "precise-scrolling-hint" = "Cuộn chính xác, dù không kèm theo một phím bổ sung,\nbằng cách di chuyện con lăn _thật chậm_";
 
@@ -383,6 +419,12 @@
 /* First draft: Quickly switch between open apps\n \nWorks like holding Command (⌘) and then pressing Tab (⇥) on your keyboard */
 "scroll-effect.app-switcher.hint" = "Nhanh chóng chuyển đổi giữa các ứng dụng đang mở\n \nHoạt động như giữ phím Command (⌘) và nhấn Tab (⇥) trên bàn phím";
 
+/* Brightness */
+"scroll-effect.brightness" = "scroll-effect.brightness";
+
+/* Smoothly adjust display brightness\n \nScroll up to increase, scroll down to decrease */
+"scroll-effect.brightness.hint" = "scroll-effect.brightness.hint";
+
 /* First draft: Horizontal Scroll */
 "scroll-effect.horizontal" = "Cuộn ngang";
 
@@ -412,6 +454,12 @@
 
 /* First draft: Scroll long distances with minimal effort */
 "scroll-effect.swift.hint" = "Cuộn nhanh một khoảng dài lên đầu trang hoặc cuối trang";
+
+/* Volume */
+"scroll-effect.volume" = "scroll-effect.volume";
+
+/* Smoothly adjust system volume\n \nScroll up to increase, scroll down to decrease */
+"scroll-effect.volume.hint" = "scroll-effect.volume.hint";
 
 /* First draft: Zoom In or Out */
 "scroll-effect.zoom" = "Phòng to hoặc thu nhỏ";

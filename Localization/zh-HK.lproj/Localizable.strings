@@ -146,6 +146,18 @@
 /* First draft: Learn More */
 "capture-toast.link" = "了解更多";
 
+/* Brightness */
+"drag-effect.brightness" = "drag-effect.brightness";
+
+/* Brightness (Horizontal) */
+"drag-effect.brightness-horizontal" = "drag-effect.brightness-horizontal";
+
+/* Smoothly adjust display brightness by moving your mouse left and right\n \nMove right to increase, move left to decrease */
+"drag-effect.brightness-horizontal.hint" = "drag-effect.brightness-horizontal.hint";
+
+/* Smoothly adjust display brightness by moving your mouse up and down\n \nMove up to increase, move down to decrease */
+"drag-effect.brightness.hint" = "drag-effect.brightness.hint";
+
 /* First draft: Spaces & Mission Control */
 "drag-effect.dock-swipe" = "空間與指揮中心";
 
@@ -157,6 +169,18 @@
 
 /* First draft: Scroll freely by moving your mouse in any direction\n \nAlso Navigate between pages in Safari, delete messages in Mail and more by moving your mouse left and right\n \nWorks like swiping with 2 fingers on an Apple Trackpad */
 "drag-effect.scroll-swipe.hint" = "向任意方向移動你的滑鼠來自由捲動n \n也可以左右移動來導覽Safari頁面、刪除「郵件」中的郵件等。\n \n作用相當於在Apple觸控板上用兩指滑動";
+
+/* Volume */
+"drag-effect.volume" = "drag-effect.volume";
+
+/* Volume (Horizontal) */
+"drag-effect.volume-horizontal" = "drag-effect.volume-horizontal";
+
+/* Smoothly adjust system volume by moving your mouse left and right\n \nMove right to increase, move left to decrease */
+"drag-effect.volume-horizontal.hint" = "drag-effect.volume-horizontal.hint";
+
+/* Smoothly adjust system volume by moving your mouse up and down\n \nMove up to increase, move down to decrease */
+"drag-effect.volume.hint" = "drag-effect.volume.hint";
 
 /* First draft: Application Windows || Note: Under macOS Sonoma, this feature is called 'App Exposé' in Trackpad settings, but 'Application Windows' in Keyboard Shortcut settings and all other places I found. */
 "effect.app-expose" = "應用程式視窗";
@@ -347,6 +371,18 @@
 /* First draft: Shift (⇧) */
 "modifer-key.tool.shift" = "Shift（⇧）";
 
+/* Hard Stop (Free Spin) */
+"momentum-arrest.deceleration" = "momentum-arrest.deceleration";
+
+/* Direction Change */
+"momentum-arrest.direction-change" = "momentum-arrest.direction-change";
+
+/* Stop: */
+"momentum-arrest.label" = "momentum-arrest.label";
+
+/* Off */
+"momentum-arrest.off" = "momentum-arrest.off";
+
 /* First draft: Scroll precisely, even without a keyboard modifier,\nbymoving the scroll wheel _slowly_ || Note: The line break (\n) is there so the layout of the Scroll tab doesn't become too wide which looks weird. You can set it to your own taste. */
 "precise-scrolling-hint" = "*慢慢*滾動滾輪來精確捲動，甚至無需鍵盤變更鍵";
 
@@ -392,6 +428,12 @@
 /* First draft: Quickly switch between open apps\n \nWorks like holding Command (⌘) and then pressing Tab (⇥) on your keyboard */
 "scroll-effect.app-switcher.hint" = "在已開啟的應用程式之間快速切換\n \n作用相當於在你的鍵盤上按住Command（⌘）然後按下Tab（⇥）";
 
+/* Brightness */
+"scroll-effect.brightness" = "scroll-effect.brightness";
+
+/* Smoothly adjust display brightness\n \nScroll up to increase, scroll down to decrease */
+"scroll-effect.brightness.hint" = "scroll-effect.brightness.hint";
+
 /* First draft: Horizontal Scroll */
 "scroll-effect.horizontal" = "水平捲動";
 
@@ -421,6 +463,12 @@
 
 /* First draft: Scroll long distances with minimal effort */
 "scroll-effect.swift.hint" = "輕鬆地捲動大範圍";
+
+/* Volume */
+"scroll-effect.volume" = "scroll-effect.volume";
+
+/* Smoothly adjust system volume\n \nScroll up to increase, scroll down to decrease */
+"scroll-effect.volume.hint" = "scroll-effect.volume.hint";
 
 /* First draft: Zoom In or Out */
 "scroll-effect.zoom" = "放大或縮小";
