@@ -170,6 +170,7 @@ typedef NSString*                                                       MFString
 #define kMFModifiedScrollEffectModificationTypeBrightness                                   @"brightness"
 #define kMFModifiedScrollEffectModificationTypeArrowKeys                                    @"arrowKeys"
 #define kMFModifiedScrollEffectModificationTypeArrowKeysHorizontal                          @"arrowKeysHorizontal"
+#define kMFModifiedScrollEffectModificationTypeWindowResize                                 @"windowResize"
 
 // Oneshot Actions
 // TODO: Used to be named ActionDict... Rename to OneShot..., or OneShotDict

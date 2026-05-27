@@ -27,6 +27,7 @@ typedef enum {
     kMFScrollEffectModificationBrightness,
     kMFScrollEffectModificationArrowKeys,
     kMFScrollEffectModificationArrowKeysHorizontal,
+    kMFScrollEffectModificationWindowResize,
 } MFScrollEffectModification;
 
 typedef struct {

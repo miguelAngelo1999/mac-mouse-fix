@@ -174,6 +174,7 @@ import CocoaLumberjackSwift
             } else if modifiers.effectMod == kMFScrollEffectModificationArrowKeys {
                 animationCurveOverride = kMFScrollAnimationCurveNameNone
             } else if modifiers.effectMod == kMFScrollEffectModificationArrowKeysHorizontal {
+            } else if modifiers.effectMod == kMFScrollEffectModificationWindowResize {
                 animationCurveOverride = kMFScrollAnimationCurveNameNone
             } else {
                 assert(false);

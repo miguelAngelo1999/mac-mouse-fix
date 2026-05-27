@@ -97,6 +97,8 @@ static NSArray *getScrollEffectsTable() {
         }},
         @{@"ui": NSLocalizedString(@"scroll-effect.brightness", @"Brightness"), @"tool": NSLocalizedString(@"scroll-effect.brightness.hint", @"Smoothly adjust display brightness\n \nScroll up to increase, scroll down to decrease"), @"dict": @{
             kMFModifiedScrollDictKeyEffectModificationType: kMFModifiedScrollEffectModificationTypeBrightness
+        @{@"ui": NSLocalizedString(@"scroll-effect.window-resize", @"Resize Window"), @"tool": NSLocalizedString(@"scroll-effect.window-resize.hint", @"Resize the window under the cursor by scrolling\n \nScroll up to make bigger, scroll down to make smaller"), @"dict": @{
+            kMFModifiedScrollDictKeyEffectModificationType: kMFModifiedScrollEffectModificationTypeWindowResize
         }},
         separatorEffectsTableEntry(),
         @{@"ui": NSLocalizedString(@"scroll-effect.swift", @"First draft: Swift Scroll"), @"tool": NSLocalizedString(@"scroll-effect.swift.hint", @"First draft: Scroll long distances with minimal effort"), @"dict": @{
