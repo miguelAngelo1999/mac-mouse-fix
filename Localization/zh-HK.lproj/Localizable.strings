@@ -182,6 +182,12 @@
 /* Smoothly adjust system volume by moving your mouse up and down\n \nMove up to increase, move down to decrease */
 "drag-effect.volume.hint" = "drag-effect.volume.hint";
 
+/* Move Window */
+"drag-effect.window-move" = "drag-effect.window-move";
+
+/* Move the window under the cursor by dragging your mouse\n \nHold the button and move your mouse to reposition any window */
+"drag-effect.window-move.hint" = "drag-effect.window-move.hint";
+
 /* First draft: Application Windows || Note: Under macOS Sonoma, this feature is called 'App Exposé' in Trackpad settings, but 'Application Windows' in Keyboard Shortcut settings and all other places I found. */
 "effect.app-expose" = "應用程式視窗";
 
