@@ -185,8 +185,8 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
                selector: @selector(reactivateAll)
                    name: NSWorkspaceDidWakeNotification
                  object: nil];
-        /// Periodic safety net — covers firmware timeout without sleep/wake cycle
-        _reactivateTimer = [NSTimer scheduledTimerWithTimeInterval: 60 * 30
+        /// Periodic safety net — covers firmware timeout and missed reconnections
+        _reactivateTimer = [NSTimer scheduledTimerWithTimeInterval: 30
                                                            target: self
                                                          selector: @selector(reactivateAll)
                                                          userInfo: nil
