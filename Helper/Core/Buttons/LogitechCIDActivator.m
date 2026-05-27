@@ -38,10 +38,16 @@ typedef struct {
     int             cidCount;
     uint16_t        pressedCIDs[32];
     int             pressedCount;
+    CFAbsoluteTime  lastReportTime;
+    BOOL            needsReactivation;
 } MFCIDDeviceState;
 
 static uint8_t sResp[20];
 static BOOL    sGotResp = NO;
+
+/// Forward declarations
+static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s);
+static IOReturn sendAndWait(IOHIDDeviceRef dev, uint8_t *pkt);
 
 static BOOL isNativeTID(uint16_t tid) {
     for (int i = 0; i < 5; i++) if (kNativeTIDs[i] == tid) return YES;
@@ -69,6 +75,24 @@ static void inputReportCallback(void *ctx, IOReturn result, void *sender,
                                 uint8_t *report, CFIndex len) {
     if (len < 5 || report[0] != kHIDPP_Long) return;
     MFCIDDeviceState *s = (MFCIDDeviceState *)ctx;
+    
+    /// Detect device reconnection: if >3 seconds since last report, re-activate diversion
+    CFAbsoluteTime now = CFAbsoluteTimeGetCurrent();
+    if (s->lastReportTime > 0 && (now - s->lastReportTime) > 3.0) {
+        s->needsReactivation = YES;
+    }
+    s->lastReportTime = now;
+    
+    /// Handle reactivation on main queue (sendAndWait needs runloop)
+    if (s->needsReactivation) {
+        s->needsReactivation = NO;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            int diverted = activateDevice(s->device, s);
+            DDLogInfo(@"LogitechCIDActivator: re-activated after reconnection (%d CIDs)", diverted);
+        });
+        return; /// Skip this report — it's likely stale
+    }
+    
     if (report[3] != 0x00) {
         memcpy(sResp, report, len < 20 ? (size_t)len : 20);
         sGotResp = YES;
@@ -182,6 +206,18 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
 - (void)handleDeviceAttached: (IOHIDDeviceRef)device {
     NSNumber *vid = (__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDVendorIDKey));
     if (vid.integerValue != kLogitechVID) return;
+    
+    /// Check if we already have this device (reconnection without remove event)
+    for (NSValue *v in _states) {
+        MFCIDDeviceState *s = (MFCIDDeviceState *)v.pointerValue;
+        if (s->device == device) {
+            /// Re-activate existing device
+            int diverted = activateDevice(device, s);
+            DDLogInfo(@"LogitechCIDActivator: re-activated existing device (%d CIDs)", diverted);
+            return;
+        }
+    }
+    
     if (IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone) != kIOReturnSuccess) return;
 
     MFCIDDeviceState *s = calloc(1, sizeof(MFCIDDeviceState));
