@@ -171,6 +171,10 @@ import CocoaLumberjackSwift
                 /// Disable animation — we want direct, immediate response
                 animationCurveOverride = kMFScrollAnimationCurveNameNone
                 
+            } else if modifiers.effectMod == kMFScrollEffectModificationArrowKeys {
+                animationCurveOverride = kMFScrollAnimationCurveNameNone
+            } else if modifiers.effectMod == kMFScrollEffectModificationArrowKeysHorizontal {
+                animationCurveOverride = kMFScrollAnimationCurveNameNone
             } else {
                 assert(false);
             }

@@ -428,6 +428,18 @@
 /* First draft: Quickly switch between open apps\n \nWorks like holding Command (⌘) and then pressing Tab (⇥) on your keyboard */
 "scroll-effect.app-switcher.hint" = "在已開啟的應用程式之間快速切換\n \n作用相當於在你的鍵盤上按住Command（⌘）然後按下Tab（⇥）";
 
+/* Arrow Keys (Vertical) */
+"scroll-effect.arrow-keys" = "scroll-effect.arrow-keys";
+
+/* Arrow Keys (Horizontal) */
+"scroll-effect.arrow-keys-horizontal" = "scroll-effect.arrow-keys-horizontal";
+
+/* Send Left/Right arrow key presses from scroll\n \nGreat for timeline scrubbing in video players like QuickTime and YouTube */
+"scroll-effect.arrow-keys-horizontal.hint" = "scroll-effect.arrow-keys-horizontal.hint";
+
+/* Send Up/Down arrow key presses from scroll\n \nGreat for navigating lists, slides, and presentations */
+"scroll-effect.arrow-keys.hint" = "scroll-effect.arrow-keys.hint";
+
 /* Brightness */
 "scroll-effect.brightness" = "scroll-effect.brightness";
 

@@ -937,6 +937,10 @@ static void sendScroll(int64_t px, MFDirection scrollDirection, BOOL animated, M
         outputType = kMFScrollOutputTypeVolume;
     } else if (_modifications.effectMod == kMFScrollEffectModificationBrightness) {
         outputType = kMFScrollOutputTypeBrightness;
+    } else if (_modifications.effectMod == kMFScrollEffectModificationArrowKeys) {
+        outputType = kMFScrollOutputTypeArrowKeys;
+    } else if (_modifications.effectMod == kMFScrollEffectModificationArrowKeysHorizontal) {
+        outputType = kMFScrollOutputTypeArrowKeysHorizontal;
     } /// kMFScrollEffectModificationHorizontalScroll is handled above when determining scroll direction
     
     /// Send event
@@ -957,6 +961,8 @@ typedef enum {
     kMFScrollOutputTypeCommandTab,
     kMFScrollOutputTypeVolume,
     kMFScrollOutputTypeBrightness,
+    kMFScrollOutputTypeArrowKeys,
+    kMFScrollOutputTypeArrowKeysHorizontal,
 } MFScrollOutputType;
 
 /// Output
@@ -1348,22 +1354,46 @@ static void sendOutputEvents(int64_t dx, int64_t dy, MFScrollOutputType outputTy
         if (d == 0) return;
         
         float currentVolume = [ScrollOutputUtility getSystemVolume];
-        float delta = (float)(d / 4000.0); /// Scale scroll delta to a small volume increment
+        float delta = (float)(d / 4000.0);
         float newVolume = currentVolume + delta;
-        [ScrollOutputUtility setSystemVolume:newVolume]; /// Clamping is handled internally
+        [ScrollOutputUtility setSystemVolume:newVolume];
         
     } else if (outputType == kMFScrollOutputTypeBrightness) {
         
         /// --- Brightness ---
-        /// Smoothly adjust display brightness using DisplayServices private framework
+        /// Smoothly adjust display brightness
         
         double d = dx + dy;
         if (d == 0) return;
         
         float currentBrightness = [ScrollOutputUtility getDisplayBrightness];
-        float delta = (float)(d / 4000.0); /// Scale scroll delta to a small brightness increment
+        float delta = (float)(d / 4000.0);
         float newBrightness = currentBrightness + delta;
-        [ScrollOutputUtility setDisplayBrightness:newBrightness]; /// Clamping is handled internally
+        [ScrollOutputUtility setDisplayBrightness:newBrightness];
+        
+    } else if (outputType == kMFScrollOutputTypeArrowKeys) {
+        
+        /// --- Arrow Keys (Vertical) ---
+        /// Scroll up → Up arrow, scroll down → Down arrow
+        
+        double d = dx + dy;
+        if (d == 0) return;
+        
+        CGKeyCode keyCode = (d > 0) ? 126 : 125;
+        sendKeyEvent(keyCode, 0, true);
+        sendKeyEvent(keyCode, 0, false);
+        
+    } else if (outputType == kMFScrollOutputTypeArrowKeysHorizontal) {
+        
+        /// --- Arrow Keys (Horizontal) ---
+        /// Scroll up → Right arrow, scroll down → Left arrow
+        
+        double d = dx + dy;
+        if (d == 0) return;
+        
+        CGKeyCode keyCode = (d > 0) ? 124 : 123;
+        sendKeyEvent(keyCode, 0, true);
+        sendKeyEvent(keyCode, 0, false);
         
     } else {
         assert(false);

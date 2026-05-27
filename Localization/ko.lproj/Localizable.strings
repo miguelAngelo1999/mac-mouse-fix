@@ -419,6 +419,18 @@
 /* First draft: Quickly switch between open apps\n \nWorks like holding Command (⌘) and then pressing Tab (⇥) on your keyboard */
 "scroll-effect.app-switcher.hint" = "열려있는 앱 사이를 빠르게 전환합니다.\n \n이는 키보드의 Command (⌘) 키 및 Tab (⇥) 키를 누르는 것과 같습니다.";
 
+/* Arrow Keys (Vertical) */
+"scroll-effect.arrow-keys" = "scroll-effect.arrow-keys";
+
+/* Arrow Keys (Horizontal) */
+"scroll-effect.arrow-keys-horizontal" = "scroll-effect.arrow-keys-horizontal";
+
+/* Send Left/Right arrow key presses from scroll\n \nGreat for timeline scrubbing in video players like QuickTime and YouTube */
+"scroll-effect.arrow-keys-horizontal.hint" = "scroll-effect.arrow-keys-horizontal.hint";
+
+/* Send Up/Down arrow key presses from scroll\n \nGreat for navigating lists, slides, and presentations */
+"scroll-effect.arrow-keys.hint" = "scroll-effect.arrow-keys.hint";
+
 /* Brightness */
 "scroll-effect.brightness" = "scroll-effect.brightness";
 
