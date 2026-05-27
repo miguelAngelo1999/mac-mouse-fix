@@ -22,6 +22,7 @@ static ModifiedDragState *_drag;
 static BOOL _rotateStarted;
 static BOOL _zoomStarted;
 static double _rotationAccumulator; /// Accumulated rotation for snap mode
+static double _gestureRotationAccumulator; /// Tracks rotation within current gesture to restart at 80°
 
 #pragma mark - Interface
 
@@ -36,6 +37,7 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
     _rotateStarted = NO;
     _zoomStarted = NO;
     _rotationAccumulator = 0.0;
+    _gestureRotationAccumulator = 0.0;
     
     /// Freeze pointer — PointerFreeze warps cursor back to origin on each event,
     /// so it never reaches screen edges and deltas never stop.
@@ -62,12 +64,22 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
                 double snappedRotation = ((_rotationAccumulator > 0) ? snapStep : -snapStep);
                 _rotationAccumulator = fmod(_rotationAccumulator, snapStep);
                 
-                IOHIDEventPhaseBits phase = _rotateStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
-                _rotateStarted = YES;
-                [TouchSimulator postRotationEventWithRotation:snappedRotation phase:phase];
+                /// Send as a complete gesture (Began + Changed + Ended) for snap
+                [TouchSimulator postRotationEventWithRotation:snappedRotation phase:kIOHIDEventPhaseBegan];
+                [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
             }
         } else {
             _rotationAccumulator = 0.0;
+            
+            /// Track accumulated rotation in this gesture — restart at 80° to avoid app caps
+            _gestureRotationAccumulator += fabs(rotation);
+            if (_gestureRotationAccumulator > 80.0 && _rotateStarted) {
+                /// End current gesture and start a new one
+                [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
+                _rotateStarted = NO;
+                _gestureRotationAccumulator = 0.0;
+            }
+            
             IOHIDEventPhaseBits phase = _rotateStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
             _rotateStarted = YES;
             [TouchSimulator postRotationEventWithRotation:rotation phase:phase];
@@ -100,6 +112,7 @@ static double _rotationAccumulator; /// Accumulated rotation for snap mode
     
     /// Unfreeze pointer
     [PointerFreeze unfreeze];
+    _gestureRotationAccumulator = 0.0;
 }
 
 + (void)suspend {
