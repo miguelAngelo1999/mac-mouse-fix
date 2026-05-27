@@ -151,6 +151,8 @@ static NSArray *getDragEffectsTable() {
         }},
         @{@"ui": NSLocalizedString(@"drag-effect.brightness-horizontal", @"Brightness (Horizontal)"), @"tool": NSLocalizedString(@"drag-effect.brightness-horizontal.hint", @"Smoothly adjust display brightness by moving your mouse left and right\n \nMove right to increase, move left to decrease"), @"dict": @{
                   kMFModifiedDragDictKeyType: kMFModifiedDragTypeBrightnessHorizontal,
+        @{@"ui": NSLocalizedString(@"drag-effect.window-move", @"Move Window"), @"tool": NSLocalizedString(@"drag-effect.window-move.hint", @"Move the window under the cursor by dragging your mouse\n \nHold the button and move your mouse to reposition any window"), @"dict": @{
+                  kMFModifiedDragDictKeyType: kMFModifiedDragTypeWindowMove,
         }},
     ];
     return dragEffectsTable;

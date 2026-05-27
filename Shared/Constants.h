@@ -145,6 +145,7 @@ typedef NSString*                                                       MFString
 #define kMFModifiedDragTypeBrightness                                   @"brightness"
 #define kMFModifiedDragTypeVolumeHorizontal                             @"volumeHorizontal"
 #define kMFModifiedDragTypeBrightnessHorizontal                         @"brightnessHorizontal"
+#define kMFModifiedDragTypeWindowMove                                   @"windowMove"
 // Variant keys
 #define kMFModifiedDragDictKeyFakeDragVariantButtonNumber               @"buttonNumber"
 
