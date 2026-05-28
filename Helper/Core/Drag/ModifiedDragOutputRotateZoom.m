@@ -53,10 +53,12 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
     /// Use dominant axis per event — prevents gesture conflicts
     BOOL horizontalDominant = fabs(deltaX) > fabs(deltaY);
     
+    DDLogDebug(@"RotateZoom: dX=%.1f dY=%.1f hDom=%d shift=%d", deltaX, deltaY, horizontalDominant, shiftHeld);
+    
     if (horizontalDominant && fabs(deltaX) > 0.5) {
         /// --- Rotate: horizontal movement (left/right) ---
         
-        double rotation = deltaX / 20.0;
+        double rotation = deltaX / 8.0; /// Increased sensitivity from /20
         
         if (shiftHeld) {
             _rotationAccumulator += rotation;
@@ -68,14 +70,26 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
                 
                 [TouchSimulator postRotationEventWithRotation:snappedRotation phase:kIOHIDEventPhaseBegan];
                 [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
+                DDLogDebug(@"RotateZoom: SNAP rotation=%.1f", snappedRotation);
             }
         } else {
             _rotationAccumulator = 0.0;
             
-            /// Send each frame as a complete independent gesture (Began → Ended)
-            /// This prevents apps from accumulating rotation and hitting their ±90° cap
-            [TouchSimulator postRotationEventWithRotation:rotation phase:kIOHIDEventPhaseBegan];
-            [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
+            /// Use continuous gesture with periodic restart every 45°
+            _gestureRotationAccumulator += fabs(rotation);
+            
+            if (_gestureRotationAccumulator > 45.0 && _rotateStarted) {
+                /// End and restart
+                [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
+                _rotateStarted = NO;
+                _gestureRotationAccumulator = 0.0;
+                DDLogDebug(@"RotateZoom: RESTART gesture at 45°");
+            }
+            
+            IOHIDEventPhaseBits phase = _rotateStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
+            _rotateStarted = YES;
+            [TouchSimulator postRotationEventWithRotation:rotation phase:phase];
+            DDLogDebug(@"RotateZoom: rotation=%.2f phase=%d accum=%.1f", rotation, phase, _gestureRotationAccumulator);
         }
         
     } else if (!horizontalDominant && fabs(deltaY) > 0.5) {
@@ -84,6 +98,7 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
         _zoomStarted = YES;
         double magnification = -deltaY / 400.0;
         [TouchSimulator postMagnificationEventWithMagnification:magnification phase:zoomPhase];
+        DDLogDebug(@"RotateZoom: zoom=%.4f phase=%d", magnification, zoomPhase);
     }
 }
 
