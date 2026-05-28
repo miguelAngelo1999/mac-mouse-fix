@@ -73,7 +73,10 @@ static void injectButton(MFCIDDeviceState *s, uint16_t cid, BOOL down) {
 static void inputReportCallback(void *ctx, IOReturn result, void *sender,
                                 IOHIDReportType type, uint32_t reportID,
                                 uint8_t *report, CFIndex len) {
-    if (len < 5 || report[0] != kHIDPP_Long) return;
+    /// Accept both short (0x10, 7 bytes) and long (0x11, 20 bytes) HID++ reports
+    /// Short reports come from Unifying receivers, long from Bolt/BT
+    if (len < 5) return;
+    if (report[0] != kHIDPP_Long && report[0] != 0x10) return;
     MFCIDDeviceState *s = (MFCIDDeviceState *)ctx;
     
     /// Detect device reconnection: if >3 seconds since last report, re-activate diversion
@@ -98,6 +101,9 @@ static void inputReportCallback(void *ctx, IOReturn result, void *sender,
         sGotResp = YES;
         return;
     }
+    
+    /// CID bytes are at offset 4,5 in both short and long reports
+    if (len < 6) return;
     uint16_t cid = ((uint16_t)report[4] << 8) | report[5];
     if (cid == 0) {
         for (int i = 0; i < s->pressedCount; i++) injectButton(s, s->pressedCIDs[i], NO);
