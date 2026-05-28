@@ -75,21 +75,11 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
         } else {
             _rotationAccumulator = 0.0;
             
-            /// Use continuous gesture with periodic restart every 45°
-            _gestureRotationAccumulator += fabs(rotation);
-            
-            if (_gestureRotationAccumulator > 45.0 && _rotateStarted) {
-                /// End and restart
-                [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
-                _rotateStarted = NO;
-                _gestureRotationAccumulator = 0.0;
-                DDLogDebug(@"RotateZoom: RESTART gesture at 45°");
-            }
-            
+            /// Continuous gesture — let the app handle its own limits
             IOHIDEventPhaseBits phase = _rotateStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
             _rotateStarted = YES;
             [TouchSimulator postRotationEventWithRotation:rotation phase:phase];
-            DDLogDebug(@"RotateZoom: rotation=%.2f phase=%d accum=%.1f", rotation, phase, _gestureRotationAccumulator);
+            DDLogDebug(@"RotateZoom: rotation=%.2f phase=%d", rotation, phase);
         }
         
     } else if (!horizontalDominant && fabs(deltaY) > 0.5) {
