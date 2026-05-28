@@ -117,7 +117,10 @@ static void inputReportCallback(void *ctx, IOReturn result, void *sender,
 
 static IOReturn sendAndWait(IOHIDDeviceRef dev, uint8_t *pkt) {
     sGotResp = NO;
-    IOReturn r = IOHIDDeviceSetReport(dev, kIOHIDReportTypeOutput, pkt[0], pkt, 20);
+    /// Determine packet size from report ID: 0x10 = short (7 bytes), 0x11 = long (20 bytes)
+    CFIndex pktLen = (pkt[0] == 0x10) ? 7 : 20;
+    IOReturn r = IOHIDDeviceSetReport(dev, kIOHIDReportTypeOutput, pkt[0], pkt, pktLen);
+    DDLogDebug(@"LogitechCIDActivator: sendAndWait reportID=0x%02X len=%ld result=%d", pkt[0], (long)pktLen, r);
     if (r != kIOReturnSuccess) return r;
     for (int i = 0; i < 100 && !sGotResp; i++) CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, false);
     if (!sGotResp) return kIOReturnTimeout;
@@ -128,11 +131,24 @@ static IOReturn sendAndWait(IOHIDDeviceRef dev, uint8_t *pkt) {
 static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     uint8_t pkt[20];
 
+    DDLogInfo(@"LogitechCIDActivator: activateDevice starting...");
+    
     /// 1. GetFeature(0x1B04)
     memset(pkt, 0, 20);
     pkt[0]=kHIDPP_Long; pkt[1]=kHIDPP_Device; pkt[2]=0x00; pkt[3]=0x0E;
     pkt[4]=(kFeat_ReprogV4>>8)&0xFF; pkt[5]=kFeat_ReprogV4&0xFF;
-    if (sendAndWait(dev, pkt) != kIOReturnSuccess || sResp[4] == 0) return 0;
+    IOReturn r1 = sendAndWait(dev, pkt);
+    DDLogInfo(@"LogitechCIDActivator: GetFeature result=%d resp[4]=%d", r1, sResp[4]);
+    if (r1 != kIOReturnSuccess || sResp[4] == 0) {
+        /// Try with short report format for Unifying receivers
+        DDLogInfo(@"LogitechCIDActivator: Long report failed, trying short format...");
+        memset(pkt, 0, 20);
+        pkt[0]=0x10; pkt[1]=0x01; pkt[2]=0x00; pkt[3]=0x0E; /// Short report, device index 1
+        pkt[4]=(kFeat_ReprogV4>>8)&0xFF; pkt[5]=kFeat_ReprogV4&0xFF;
+        r1 = sendAndWait(dev, pkt);
+        DDLogInfo(@"LogitechCIDActivator: Short report result=%d resp[4]=%d", r1, sResp[4]);
+        if (r1 != kIOReturnSuccess || sResp[4] == 0) return 0;
+    }
     uint8_t feat = sResp[4];
 
     /// 2. GetCount
