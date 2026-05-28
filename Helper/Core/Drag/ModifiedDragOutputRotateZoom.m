@@ -72,17 +72,10 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
         } else {
             _rotationAccumulator = 0.0;
             
-            /// Restart gesture every 80° to bypass app's ±90° cap
-            _gestureRotationAccumulator += fabs(rotation);
-            if (_gestureRotationAccumulator > 80.0 && _rotateStarted) {
-                [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
-                _rotateStarted = NO;
-                _gestureRotationAccumulator = 0.0;
-            }
-            
-            IOHIDEventPhaseBits phase = _rotateStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
-            _rotateStarted = YES;
-            [TouchSimulator postRotationEventWithRotation:rotation phase:phase];
+            /// Send each frame as a complete independent gesture (Began → Ended)
+            /// This prevents apps from accumulating rotation and hitting their ±90° cap
+            [TouchSimulator postRotationEventWithRotation:rotation phase:kIOHIDEventPhaseBegan];
+            [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
         }
         
     } else if (!horizontalDominant && fabs(deltaY) > 0.5) {
