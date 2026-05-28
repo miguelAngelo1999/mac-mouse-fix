@@ -9,12 +9,12 @@ Resolve Package Graph
 
 
 Resolved source packages:
-  ReactiveSwift: https://github.com/ReactiveCocoa/ReactiveSwift @ 7.1.1
   ReactiveCocoa: https://github.com/ReactiveCocoa/ReactiveCocoa @ 12.0.0
   cmark-gfm: https://github.com/swiftlang/swift-cmark.git @ gfm (b022b08)
-  CocoaLumberjack: https://github.com/CocoaLumberjack/CocoaLumberjack.git @ 3.8.5
   swift-markdown: https://github.com/apple/swift-markdown @ main (2829eef)
+  ReactiveSwift: https://github.com/ReactiveCocoa/ReactiveSwift @ 7.1.1
   swift-log: https://github.com/apple/swift-log @ 1.6.1
+  CocoaLumberjack: https://github.com/CocoaLumberjack/CocoaLumberjack.git @ 3.8.5
 
 --- xcodebuild: WARNING: Using the first of multiple matching destinations:
 { platform:macOS, arch:arm64, id:00006021-000409481E47401E, name:My Mac }
@@ -1365,7 +1365,7 @@ PhaseScriptExecution Copy\ Version\ From\ Main\ App /Users/virgoh/Library/Develo
     export arch\=undefined_arch
     export variant\=normal
     /bin/sh -c /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse\\\ Fix.build/Debug/Mac\\\ Mouse\\\ Fix\\\ Helper.build/Script-4FEEEC53263C164000C50193.sh
-/Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse Fix.build/Debug/Mac Mouse Fix Helper.build/Script-4FEEEC53263C164000C50193.sh: line 11: 24346: command not found
+/Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse Fix.build/Debug/Mac Mouse Fix Helper.build/Script-4FEEEC53263C164000C50193.sh: line 11: 24347: command not found
 
 ScanDependencies /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse\ Fix.build/Debug/Mac\ Mouse\ Fix\ Helper.build/Objects-normal/arm64/ModifiedDragOutputRotateZoom.o /Users/virgoh/CodingProjects/mac-mouse-fix/mac-mouse-fix/Helper/Core/Drag/ModifiedDragOutputRotateZoom.m normal arm64 objective-c com.apple.compilers.llvm.clang.1_0.compiler (in target 'Mac Mouse Fix Helper' from project 'Mouse Fix')
     cd /Users/virgoh/CodingProjects/mac-mouse-fix/mac-mouse-fix
@@ -1409,8 +1409,8 @@ GenerateDSYMFile /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anf
 ExtractAppIntentsMetadata (in target 'Mac Mouse Fix Helper' from project 'Mouse Fix')
     cd /Users/virgoh/CodingProjects/mac-mouse-fix/mac-mouse-fix
     /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/appintentsmetadataprocessor --toolchain-dir /var/run/com.apple.security.cryptexd/mnt/com.apple.MobileAsset.MetalToolchain-v17.5.188.0.QrpzGJ/Metal.xctoolchain --module-name Mac_Mouse_Fix_Helper --sdk-root /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.4.sdk --xcode-version 17E202 --platform-family macOS --deployment-target 10.15.0 --bundle-identifier com.virgoh.mac-mouse-fix.helper --output /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix\ Helper.app/Contents/Resources --target-triple arm64-apple-macos10.15.0 --binary-file /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix\ Helper.app/Contents/MacOS/Mac\ Mouse\ Fix\ Helper --dependency-file /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse\ Fix.build/Debug/Mac\ Mouse\ Fix\ Helper.build/Objects-normal/arm64/Mac\ Mouse\ Fix\ Helper_dependency_info.dat --stringsdata-file /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse\ Fix.build/Debug/Mac\ Mouse\ Fix\ Helper.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata --source-file-list /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse\ Fix.build/Debug/Mac\ Mouse\ Fix\ Helper.build/Objects-normal/arm64/Mac\ Mouse\ Fix\ Helper.SwiftFileList --metadata-file-list /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse\ Fix.build/Debug/Mac\ Mouse\ Fix\ Helper.build/Mac\ Mouse\ Fix\ Helper.DependencyMetadataFileList --static-metadata-file-list /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse\ Fix.build/Debug/Mac\ Mouse\ Fix\ Helper.build/Mac\ Mouse\ Fix\ Helper.DependencyStaticMetadataFileList --swift-const-vals-list /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse\ Fix.build/Debug/Mac\ Mouse\ Fix\ Helper.build/Objects-normal/arm64/Mac\ Mouse\ Fix\ Helper.SwiftConstValuesFileList --compile-time-extraction --deployment-aware-processing --validate-assistant-intents --no-app-shortcuts-localization
-2026-05-27 18:21:39.759 appintentsmetadataprocessor[11097:3359389] Starting appintentsmetadataprocessor export
-2026-05-27 18:21:39.764 appintentsmetadataprocessor[11097:3359389] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
+2026-05-28 11:23:51.313 appintentsmetadataprocessor[29048:5003470] Starting appintentsmetadataprocessor export
+2026-05-28 11:23:51.329 appintentsmetadataprocessor[29048:5003470] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
 
 CopySwiftLibs /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix\ Helper.app (in target 'Mac Mouse Fix Helper' from project 'Mouse Fix')
     cd /Users/virgoh/CodingProjects/mac-mouse-fix/mac-mouse-fix
@@ -2121,13 +2121,13 @@ CodeSign /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbh
     /usr/bin/codesign --force --sign 7D10C5F7D4A3BDB1CD696623C7E3B53491B70757 -o runtime --entitlements /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Intermediates.noindex/Mouse\ Fix.build/Debug/Mac\ Mouse\ Fix.build/Mac\ Mouse\ Fix.app.xcent --timestamp\=none --generate-entitlement-der /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix.app
 /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac Mouse Fix.app: replacing existing signature
 
-Validate /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix.app (in target 'Mac Mouse Fix' from project 'Mouse Fix')
-    cd /Users/virgoh/CodingProjects/mac-mouse-fix/mac-mouse-fix
-    builtin-validationUtility /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix.app -no-validate-extension -infoplist-subpath Contents/Info.plist
-
 ValidateEmbeddedBinary /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix.app/Contents/Library/LoginItems/Mac\ Mouse\ Fix\ Helper.app (in target 'Mac Mouse Fix' from project 'Mouse Fix')
     cd /Users/virgoh/CodingProjects/mac-mouse-fix/mac-mouse-fix
     /Applications/Xcode.app/Contents/Developer/usr/bin/embeddedBinaryValidationUtility /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix.app/Contents/Library/LoginItems/Mac\ Mouse\ Fix\ Helper.app -signing-cert 7D10C5F7D4A3BDB1CD696623C7E3B53491B70757 -info-plist-path /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix.app/Contents/Info.plist
+
+Validate /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix.app (in target 'Mac Mouse Fix' from project 'Mouse Fix')
+    cd /Users/virgoh/CodingProjects/mac-mouse-fix/mac-mouse-fix
+    builtin-validationUtility /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix.app -no-validate-extension -infoplist-subpath Contents/Info.plist
 
 RegisterWithLaunchServices /Users/virgoh/Library/Developer/Xcode/DerivedData/Mouse_Fix-anfukalakbhcybdptrndzfzdzauu/Build/Products/Debug/Mac\ Mouse\ Fix.app (in target 'Mac Mouse Fix' from project 'Mouse Fix')
     cd /Users/virgoh/CodingProjects/mac-mouse-fix/mac-mouse-fix

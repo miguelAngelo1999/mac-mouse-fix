@@ -50,11 +50,13 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
     CGEventFlags flags = CGEventGetFlags(event);
     BOOL shiftHeld = (flags & kCGEventFlagMaskShift) != 0;
     
-    /// Both axes work simultaneously — no dominant axis locking
+    /// Use dominant axis per event — prevents gesture conflicts
+    BOOL horizontalDominant = fabs(deltaX) > fabs(deltaY);
     
-    /// --- Rotate: horizontal movement (left/right) ---
-    if (fabs(deltaX) > 0.5) {
-        double rotation = deltaX / 20.0; /// Small increments — real trackpad sends ~0.5-2° per frame
+    if (horizontalDominant && fabs(deltaX) > 0.5) {
+        /// --- Rotate: horizontal movement (left/right) ---
+        
+        double rotation = deltaX / 20.0;
         
         if (shiftHeld) {
             _rotationAccumulator += rotation;
@@ -64,17 +66,15 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
                 double snappedRotation = ((_rotationAccumulator > 0) ? snapStep : -snapStep);
                 _rotationAccumulator = fmod(_rotationAccumulator, snapStep);
                 
-                /// Send as a complete gesture (Began + Changed + Ended) for snap
                 [TouchSimulator postRotationEventWithRotation:snappedRotation phase:kIOHIDEventPhaseBegan];
                 [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
             }
         } else {
             _rotationAccumulator = 0.0;
             
-            /// Track accumulated rotation in this gesture — restart at 80° to avoid app caps
+            /// Restart gesture every 80° to bypass app's ±90° cap
             _gestureRotationAccumulator += fabs(rotation);
             if (_gestureRotationAccumulator > 80.0 && _rotateStarted) {
-                /// End current gesture and start a new one
                 [TouchSimulator postRotationEventWithRotation:0 phase:kIOHIDEventPhaseEnded];
                 _rotateStarted = NO;
                 _gestureRotationAccumulator = 0.0;
@@ -84,10 +84,9 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
             _rotateStarted = YES;
             [TouchSimulator postRotationEventWithRotation:rotation phase:phase];
         }
-    }
-    
-    /// --- Zoom: vertical movement (up = zoom in, down = zoom out) ---
-    if (fabs(deltaY) > 0.5) {
+        
+    } else if (!horizontalDominant && fabs(deltaY) > 0.5) {
+        /// --- Zoom: vertical movement (up = zoom in, down = zoom out) ---
         IOHIDEventPhaseBits zoomPhase = _zoomStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
         _zoomStarted = YES;
         double magnification = -deltaY / 400.0;
