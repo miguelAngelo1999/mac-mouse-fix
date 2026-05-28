@@ -133,27 +133,25 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
 
     DDLogInfo(@"LogitechCIDActivator: activateDevice starting...");
     
+    /// Determine device index — 0xFF for direct BT, 0x01 for first device on Unifying receiver
+    NSNumber *usagePage = (__bridge NSNumber *)IOHIDDeviceGetProperty(dev, CFSTR(kIOHIDPrimaryUsagePageKey));
+    BOOL isReceiver = (usagePage.integerValue == 0xFF00 || usagePage.integerValue == 0x00FF);
+    uint8_t deviceIdx = isReceiver ? 0x01 : kHIDPP_Device;
+    
+    DDLogInfo(@"LogitechCIDActivator: isReceiver=%d deviceIdx=0x%02X", isReceiver, deviceIdx);
+    
     /// 1. GetFeature(0x1B04)
     memset(pkt, 0, 20);
-    pkt[0]=kHIDPP_Long; pkt[1]=kHIDPP_Device; pkt[2]=0x00; pkt[3]=0x0E;
+    pkt[0]=kHIDPP_Long; pkt[1]=deviceIdx; pkt[2]=0x00; pkt[3]=0x0E;
     pkt[4]=(kFeat_ReprogV4>>8)&0xFF; pkt[5]=kFeat_ReprogV4&0xFF;
     IOReturn r1 = sendAndWait(dev, pkt);
     DDLogInfo(@"LogitechCIDActivator: GetFeature result=%d resp[4]=%d", r1, sResp[4]);
-    if (r1 != kIOReturnSuccess || sResp[4] == 0) {
-        /// Try with short report format for Unifying receivers
-        DDLogInfo(@"LogitechCIDActivator: Long report failed, trying short format...");
-        memset(pkt, 0, 20);
-        pkt[0]=0x10; pkt[1]=0x01; pkt[2]=0x00; pkt[3]=0x0E; /// Short report, device index 1
-        pkt[4]=(kFeat_ReprogV4>>8)&0xFF; pkt[5]=kFeat_ReprogV4&0xFF;
-        r1 = sendAndWait(dev, pkt);
-        DDLogInfo(@"LogitechCIDActivator: Short report result=%d resp[4]=%d", r1, sResp[4]);
-        if (r1 != kIOReturnSuccess || sResp[4] == 0) return 0;
-    }
+    if (r1 != kIOReturnSuccess || sResp[4] == 0) return 0;
     uint8_t feat = sResp[4];
 
     /// 2. GetCount
     memset(pkt, 0, 20);
-    pkt[0]=kHIDPP_Long; pkt[1]=kHIDPP_Device; pkt[2]=feat; pkt[3]=0x0E;
+    pkt[0]=kHIDPP_Long; pkt[1]=deviceIdx; pkt[2]=feat; pkt[3]=0x0E;
     if (sendAndWait(dev, pkt) != kIOReturnSuccess) return 0;
     int count = sResp[4];
 
@@ -161,7 +159,7 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     uint16_t todivert[32]; int ndiv = 0;
     for (int i = 0; i < count && ndiv < 32; i++) {
         memset(pkt, 0, 20);
-        pkt[0]=kHIDPP_Long; pkt[1]=kHIDPP_Device; pkt[2]=feat; pkt[3]=0x1E; pkt[4]=(uint8_t)i;
+        pkt[0]=kHIDPP_Long; pkt[1]=deviceIdx; pkt[2]=feat; pkt[3]=0x1E; pkt[4]=(uint8_t)i;
         if (sendAndWait(dev, pkt) != kIOReturnSuccess) continue;
         uint16_t cid = ((uint16_t)sResp[4]<<8)|sResp[5];
         uint16_t tid = ((uint16_t)sResp[6]<<8)|sResp[7];
@@ -176,10 +174,11 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     int diverted = 0;
     for (int i = 0; i < ndiv; i++) {
         memset(pkt, 0, 20);
-        pkt[0]=kHIDPP_Long; pkt[1]=kHIDPP_Device; pkt[2]=feat; pkt[3]=0x3E;
+        pkt[0]=kHIDPP_Long; pkt[1]=deviceIdx; pkt[2]=feat; pkt[3]=0x3E;
         pkt[4]=(todivert[i]>>8)&0xFF; pkt[5]=todivert[i]&0xFF; pkt[6]=kDivertFlags;
         if (sendAndWait(dev, pkt) == kIOReturnSuccess) diverted++;
     }
+    DDLogInfo(@"LogitechCIDActivator: diverted %d of %d CIDs (count=%d)", diverted, ndiv, count);
     return diverted;
 }
 
@@ -233,11 +232,30 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     for (NSValue *v in _states) {
         MFCIDDeviceState *s = (MFCIDDeviceState *)v.pointerValue;
         if (s->device == device) {
-            /// Re-activate existing device
             int diverted = activateDevice(device, s);
             DDLogInfo(@"LogitechCIDActivator: re-activated existing device (%d CIDs)", diverted);
             return;
         }
+    }
+    
+    /// For Unifying receivers: only open the raw HID++ interface (usage page 0xFF00)
+    /// Skip keyboard (usage page 0x01, usage 0x06) and mouse (usage page 0x01, usage 0x02) interfaces
+    NSNumber *usagePage = (__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDPrimaryUsagePageKey));
+    NSNumber *usage = (__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDPrimaryUsageKey));
+    NSNumber *pid = (__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductIDKey));
+    NSString *product = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
+    
+    DDLogInfo(@"LogitechCIDActivator: device attached — product='%@' pid=0x%04lX usagePage=0x%04lX usage=0x%04lX",
+              product, (long)pid.integerValue, (long)usagePage.integerValue, (long)usage.integerValue);
+    
+    /// Accept: BT mice (usage page 1, usage 2) OR raw HID++ interface (usage page 0xFF00)
+    /// The raw interface is needed for Unifying receivers
+    BOOL isMouse = (usagePage.integerValue == 0x01 && usage.integerValue == 0x02);
+    BOOL isRawHIDPP = (usagePage.integerValue == 0xFF00 || usagePage.integerValue == 0x00FF);
+    
+    if (!isMouse && !isRawHIDPP) {
+        DDLogInfo(@"LogitechCIDActivator: skipping non-mouse/non-raw interface");
+        return;
     }
     
     if (IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone) != kIOReturnSuccess) return;
