@@ -50,10 +50,20 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
     CGEventFlags flags = CGEventGetFlags(event);
     BOOL shiftHeld = (flags & kCGEventFlagMaskShift) != 0;
     
-    /// Use dominant axis per event — prevents gesture conflicts
-    BOOL horizontalDominant = fabs(deltaX) > fabs(deltaY);
+    /// Axis selection with hysteresis — once an axis is active, require 2x the other
+    /// axis magnitude to switch. Prevents jitter on diagonal movements.
+    static BOOL _lastWasRotate = NO;
     
-    DDLogDebug(@"RotateZoom: dX=%.1f dY=%.1f hDom=%d shift=%d", deltaX, deltaY, horizontalDominant, shiftHeld);
+    BOOL horizontalDominant;
+    if (_rotateStarted && !_zoomStarted) {
+        /// Currently rotating — need 2x vertical to switch to zoom
+        horizontalDominant = fabs(deltaX) > fabs(deltaY) * 0.5;
+    } else if (_zoomStarted && !_rotateStarted) {
+        /// Currently zooming — need 2x horizontal to switch to rotate
+        horizontalDominant = fabs(deltaX) * 0.5 > fabs(deltaY);
+    } else {
+        horizontalDominant = fabs(deltaX) > fabs(deltaY);
+    }
     
     if (horizontalDominant && fabs(deltaX) > 0.5) {
         /// --- Rotate: horizontal movement (left/right) ---
