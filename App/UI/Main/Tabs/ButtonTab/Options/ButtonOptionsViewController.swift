@@ -18,17 +18,11 @@ class ButtonOptionsViewController: NSViewController {
     static var instance: ButtonOptionsViewController? = nil
     
     var lockPointer = ConfigValue<Bool>(configPath: "General.lockPointerDuringDrag")
-    var primaryButtonModLayer = ConfigValue<Bool>(configPath: "General.primaryButtonModifierLayer")
-    var showMenuBarItem = ConfigValue<Bool>(configPath: "General.showMenuBarItem")
     
     /// IB outlets & actions
     
     @IBOutlet weak var doneButton: NSButton!
     @IBOutlet weak var lockPointerButton: NSButton!
-    
-    /// Programmatic toggles
-    private var primaryButtonModLayerButton: NSButton!
-    private var showMenuBarButton: NSButton!
         
     @IBAction func done(_ sender: Any) {
         ButtonOptionsViewController.remove()
@@ -41,40 +35,6 @@ class ButtonOptionsViewController: NSViewController {
         
         lockPointerButton.reactive.boolValue <~ lockPointer
         lockPointer <~ lockPointerButton.reactive.boolValues
-        
-        /// Create extra toggles
-        primaryButtonModLayerButton = NSButton(checkboxWithTitle: "Primary button modifier layer (hold thumb → remap L/R click)", target: nil, action: nil)
-        primaryButtonModLayerButton.toolTip = "When enabled, holding button 4/5/6 lets you remap left and right click to different actions"
-        primaryButtonModLayerButton.reactive.boolValue <~ primaryButtonModLayer
-        primaryButtonModLayer <~ primaryButtonModLayerButton.reactive.boolValues
-        
-        showMenuBarButton = NSButton(checkboxWithTitle: "Show menu bar icon (with active modifier indicator)", target: nil, action: nil)
-        showMenuBarButton.toolTip = "Shows the Mac Mouse Fix icon in the menu bar. Displays which button modifier is active."
-        showMenuBarButton.reactive.boolValue <~ showMenuBarItem
-        showMenuBarItem <~ showMenuBarButton.reactive.boolValues
-        
-        /// Add to view and position below existing content
-        let container = self.view
-        primaryButtonModLayerButton.translatesAutoresizingMaskIntoConstraints = false
-        showMenuBarButton.translatesAutoresizingMaskIntoConstraints = false
-        container.addSubview(primaryButtonModLayerButton)
-        container.addSubview(showMenuBarButton)
-        
-        /// Expand the view height to fit new toggles
-        let extraHeight: CGFloat = 60
-        var frame = container.frame
-        frame.size.height += extraHeight
-        container.frame = frame
-        self.preferredContentSize = frame.size
-        
-        /// Position new toggles below the lock pointer checkbox
-        NSLayoutConstraint.activate([
-            primaryButtonModLayerButton.leadingAnchor.constraint(equalTo: lockPointerButton.leadingAnchor),
-            primaryButtonModLayerButton.topAnchor.constraint(equalTo: lockPointerButton.bottomAnchor, constant: 12),
-            showMenuBarButton.leadingAnchor.constraint(equalTo: lockPointerButton.leadingAnchor),
-            showMenuBarButton.topAnchor.constraint(equalTo: primaryButtonModLayerButton.bottomAnchor, constant: 8),
-            showMenuBarButton.bottomAnchor.constraint(lessThanOrEqualTo: doneButton.topAnchor, constant: -12),
-        ])
         
         /// Adjust views for Tahoe
         if #available(macOS 26.0, *) {
