@@ -258,12 +258,24 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
         return;
     }
     
-    if (IOHIDDeviceOpen(device, kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess) {
-        /// Fallback to non-exclusive if seize fails
-        if (IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone) != kIOReturnSuccess) {
-            NSLog(@"LogitechCIDActivator: ⚠️ Could not open device (both seize and normal failed)");
-            return;
+    /// For USB receivers (raw HID++ interface), try seize to get exclusive access
+    /// For BT devices, use normal open (seize breaks them)
+    NSNumber *openUsagePage = (__bridge NSNumber *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDPrimaryUsagePageKey));
+    BOOL isRawInterface = (openUsagePage.integerValue == 0xFF00);
+    
+    IOReturn openResult;
+    if (isRawInterface) {
+        openResult = IOHIDDeviceOpen(device, kIOHIDOptionsTypeSeizeDevice);
+        if (openResult != kIOReturnSuccess) {
+            openResult = IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone);
         }
+    } else {
+        openResult = IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone);
+    }
+    
+    if (openResult != kIOReturnSuccess) {
+        NSLog(@"LogitechCIDActivator: ⚠️ Could not open device");
+        return;
     }
 
     MFCIDDeviceState *s = calloc(1, sizeof(MFCIDDeviceState));
