@@ -188,42 +188,51 @@ static float _brightnessAccumulator = 0.0f;
 }
 
 + (void)adjustBrightnessByDelta:(float)delta {
-    /// Accumulate delta and apply in discrete steps.
+    /// Accumulate delta and apply.
     /// Built-in display: DisplayServicesSetBrightness (smooth, continuous).
-    /// External display: DDC VCP 0x10 write via IOAVService (per-monitor, shows HUD in MonitorControl).
+    /// External display: Also try DisplayServicesSetBrightness first (works on macOS 12+),
+    /// fall back to DDC VCP 0x10 write via IOAVService.
     
     _brightnessAccumulator += delta;
     
     CGDirectDisplayID display = [self displayUnderMouse];
-    BOOL isBuiltIn = CGDisplayIsBuiltin(display);
     
-    if (isBuiltIn) {
-        /// Built-in: apply continuously via DisplayServices
-        void *handle = displayServicesHandle();
-        if (!handle) return;
+    /// Try DisplayServices for ALL displays (works for built-in always, and for
+    /// many external displays on macOS 12+ Apple Silicon)
+    void *handle = displayServicesHandle();
+    if (handle) {
         DisplayServicesGetBrightnessFunc getFn = dlsym(handle, "DisplayServicesGetBrightness");
         DisplayServicesSetBrightnessFunc setFn = dlsym(handle, "DisplayServicesSetBrightness");
-        if (!getFn || !setFn) return;
-        
-        float current = 0.5f;
-        getFn(display, &current);
-        float newVal = fmaxf(0.0f, fminf(1.0f, current + _brightnessAccumulator));
-        setFn(display, newVal);
-        _brightnessAccumulator = 0.0f;
-        
-        showOSD(display, MFOSDImageBrightness, newVal);
-        
-    } else {
-        /// External: DDC in steps of 1/100 (DDC range 0–100)
-        float step = 1.0f / 100.0f;
-        int steps = 0;
-        while (_brightnessAccumulator >= step)  { steps++;  _brightnessAccumulator -= step; }
-        while (_brightnessAccumulator <= -step) { steps--;  _brightnessAccumulator += step; }
-        if (steps == 0) return;
-        
-        [self writeDDCBrightnessSteps:steps forDisplay:display];
-        /// OSD shown inside writeDDCBrightnessSteps after cache update
+        if (getFn && setFn) {
+            float current = 0.5f;
+            int getResult = getFn(display, &current);
+            if (getResult == 0) {
+                /// DisplayServices works for this display
+                float newVal = fmaxf(0.0f, fminf(1.0f, current + _brightnessAccumulator));
+                setFn(display, newVal);
+                _brightnessAccumulator = 0.0f;
+                showOSD(display, MFOSDImageBrightness, newVal);
+                return;
+            }
+        }
     }
+    
+    /// Fallback: DDC for external displays where DisplayServices doesn't work
+    BOOL isBuiltIn = CGDisplayIsBuiltin(display);
+    if (isBuiltIn) {
+        /// Built-in but DisplayServices failed above — shouldn't happen, but reset accumulator
+        _brightnessAccumulator = 0.0f;
+        return;
+    }
+    
+    /// External: DDC in steps of 1/100 (DDC range 0–100)
+    float step = 1.0f / 100.0f;
+    int steps = 0;
+    while (_brightnessAccumulator >= step)  { steps++;  _brightnessAccumulator -= step; }
+    while (_brightnessAccumulator <= -step) { steps--;  _brightnessAccumulator += step; }
+    if (steps == 0) return;
+    
+    [self writeDDCBrightnessSteps:steps forDisplay:display];
 }
 
 + (void)setDisplayBrightness:(float)brightness {
@@ -261,15 +270,16 @@ static float _brightnessAccumulator = 0.0f;
     uint8_t valHigh = (newVal >> 8) & 0xFF;
     uint8_t valLow  = newVal & 0xFF;
     
-    /// Packet: [0x80|len, 0x03, vcpCode, valHigh, valLow, checksum]
-    /// checksum = XOR of (destination<<1) ^ all bytes before checksum
+    /// DDC/CI packet format for Set VCP:
+    /// [length|0x80, 0x03, vcpCode, valHigh, valLow, checksum]
+    /// Checksum = XOR of: source_addr(0x6E) ^ dest_write_addr(0x51) ^ all_data_bytes
     uint8_t packet[6];
-    packet[0] = 0x84;       // 0x80 | 4 (payload length)
+    packet[0] = 0x84;       // 0x80 | 4 (payload length including opcode)
     packet[1] = 0x03;       // Set VCP Feature opcode
     packet[2] = vcpCode;
     packet[3] = valHigh;
     packet[4] = valLow;
-    packet[5] = 0x6E ^ packet[0] ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4]; // 0x6E = 0x37<<1
+    packet[5] = 0x6E ^ 0x51 ^ packet[0] ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4];
     
     uint32_t chipAddress = 0x37;
     uint32_t dataAddress = 0x51;
