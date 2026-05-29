@@ -2,8 +2,14 @@
 /* Class = "NSButtonCell"; title = "Done"; ObjectID = "COH-CF-CQd"; */
 "COH-CF-CQd.title" = "完成";
 
-/* Class = "NSTextFieldCell"; title = "Recommended for Trackball Mice"; ObjectID = "DQ6-Rq-6nC"; Note = "Locking the Mouse Pointer during 'Click and Drag' Gestures is \"Recommended for Trackball Mice\""; */
+/* Class = "NSTextFieldCell"; title = "Recommended for Trackball Mice"; ObjectID = "DQ6-Rq-6nC"; */
 "DQ6-Rq-6nC.title" = "建議軌跡球滑鼠採用";
+
+/* Class = "NSButtonCell"; title = "Show menu bar icon (with active modifier indicator)"; ObjectID = "MNU-cl-001"; */
+"MNU-cl-001.title" = "Show menu bar icon (with active modifier indicator)";
+
+/* Class = "NSButtonCell"; title = "Primary button modifier layer (hold thumb → remap L/R click)"; ObjectID = "MOD-cl-001"; */
+"MOD-cl-001.title" = "Primary button modifier layer (hold thumb → remap L/R click)";
 
 /* Class = "NSButtonCell"; title = "Lock Mouse Pointer During 'Click and Drag' Gestures"; ObjectID = "Mmp-uv-DmY"; */
 "Mmp-uv-DmY.title" = "「按下並拖移」手勢過程中鎖定滑鼠指標";

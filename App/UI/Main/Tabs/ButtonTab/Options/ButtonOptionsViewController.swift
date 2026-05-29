@@ -18,11 +18,15 @@ class ButtonOptionsViewController: NSViewController {
     static var instance: ButtonOptionsViewController? = nil
     
     var lockPointer = ConfigValue<Bool>(configPath: "General.lockPointerDuringDrag")
+    var primaryButtonModLayer = ConfigValue<Bool>(configPath: "General.primaryButtonModifierLayer")
+    var showMenuBarItem = ConfigValue<Bool>(configPath: "General.showMenuBarItem")
     
     /// IB outlets & actions
     
     @IBOutlet weak var doneButton: NSButton!
     @IBOutlet weak var lockPointerButton: NSButton!
+    @IBOutlet weak var primaryButtonModLayerButton: NSButton!
+    @IBOutlet weak var showMenuBarButton: NSButton!
         
     @IBAction func done(_ sender: Any) {
         ButtonOptionsViewController.remove()
@@ -35,6 +39,12 @@ class ButtonOptionsViewController: NSViewController {
         
         lockPointerButton.reactive.boolValue <~ lockPointer
         lockPointer <~ lockPointerButton.reactive.boolValues
+        
+        primaryButtonModLayerButton.reactive.boolValue <~ primaryButtonModLayer
+        primaryButtonModLayer <~ primaryButtonModLayerButton.reactive.boolValues
+        
+        showMenuBarButton.reactive.boolValue <~ showMenuBarItem
+        showMenuBarItem <~ showMenuBarButton.reactive.boolValues
         
         /// Adjust views for Tahoe
         if #available(macOS 26.0, *) {
