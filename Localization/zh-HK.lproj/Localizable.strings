@@ -176,6 +176,12 @@
 /* First draft: Move your mouse:\n - Up to show Mission Control\n - Down to show Application Windows\n - Left or Right to move between Spaces\n \nWorks like swiping with 3 fingers on an Apple Trackpad */
 "drag-effect.dock-swipe.hint" = "移動你的滑鼠：\n・向上來顯示指揮中心\n・向下來顯示應用程式視窗\n・向左或向右來切換「空間」\n \n作用相當於在Apple觸控板上用三指滑動";
 
+/* Notification Center */
+"drag-effect.notification-center" = "drag-effect.notification-center";
+
+/* Swipe left to open Notification Center, right to close\n \nWorks like a two-finger swipe from the right edge of a trackpad */
+"drag-effect.notification-center.hint" = "drag-effect.notification-center.hint";
+
 /* Rotate & Zoom */
 "drag-effect.rotate-zoom" = "drag-effect.rotate-zoom";
 

@@ -284,6 +284,7 @@
 		4FF0255727B0091700923107 /* ModifiedDragOutputAddMode.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FF0255627B0091700923107 /* ModifiedDragOutputAddMode.m */; };
 		CC000001000000000000CC03 /* ModifiedDragOutputWindowMove.m in Sources */ = {isa = PBXBuildFile; fileRef = CC000001000000000000CC02 /* ModifiedDragOutputWindowMove.m */; };
 		DD000001000000000000DD03 /* ModifiedDragOutputRotateZoom.m in Sources */ = {isa = PBXBuildFile; fileRef = DD000001000000000000DD02 /* ModifiedDragOutputRotateZoom.m */; };
+		NC000001000000000000NC03 /* ModifiedDragOutputNotificationCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = NC000001000000000000NC02 /* ModifiedDragOutputNotificationCenter.m */; };
 		4FF0255F27B013A100923107 /* PointerFreeze.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FF0255E27B013A100923107 /* PointerFreeze.m */; };
 		4FF0BD4B266A8B7E003935EA /* Bezier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF0BD4A266A8B7E003935EA /* Bezier.swift */; };
 		4FF0BD51266AC10C003935EA /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FF0BD50266AC10C003935EA /* Math.swift */; };
@@ -2342,6 +2343,8 @@
 		CC000001000000000000CC02 /* ModifiedDragOutputWindowMove.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModifiedDragOutputWindowMove.m; sourceTree = "<group>"; };
 		DD000001000000000000DD01 /* ModifiedDragOutputRotateZoom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModifiedDragOutputRotateZoom.h; sourceTree = "<group>"; };
 		DD000001000000000000DD02 /* ModifiedDragOutputRotateZoom.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModifiedDragOutputRotateZoom.m; sourceTree = "<group>"; };
+		NC000001000000000000NC01 /* ModifiedDragOutputNotificationCenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModifiedDragOutputNotificationCenter.h; sourceTree = "<group>"; };
+		NC000001000000000000NC02 /* ModifiedDragOutputNotificationCenter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModifiedDragOutputNotificationCenter.m; sourceTree = "<group>"; };
 		4FF0255D27B013A100923107 /* PointerFreeze.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PointerFreeze.h; sourceTree = "<group>"; };
 		4FF0255E27B013A100923107 /* PointerFreeze.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PointerFreeze.m; sourceTree = "<group>"; };
 		4FF0BD4A266A8B7E003935EA /* Bezier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bezier.swift; sourceTree = "<group>"; };
@@ -7533,6 +7536,8 @@
 					CC000001000000000000CC02 /* ModifiedDragOutputWindowMove.m */,
 					DD000001000000000000DD01 /* ModifiedDragOutputRotateZoom.h */,
 					DD000001000000000000DD02 /* ModifiedDragOutputRotateZoom.m */,
+					NC000001000000000000NC01 /* ModifiedDragOutputNotificationCenter.h */,
+					NC000001000000000000NC02 /* ModifiedDragOutputNotificationCenter.m */,
 				4FCB260D293147CD0066EE56 /* ModifiedDrag.swift */,
 				4FF0255827B00F9700923107 /* ThreeFingerSwipe */,
 				4FF0255927B00FA400923107 /* TwoFingerSwipe */,
@@ -8217,6 +8222,7 @@
 				4FF0255727B0091700923107 /* ModifiedDragOutputAddMode.m in Sources */,
 					CC000001000000000000CC03 /* ModifiedDragOutputWindowMove.m in Sources */,
 					DD000001000000000000DD03 /* ModifiedDragOutputRotateZoom.m in Sources */,
+				NC000001000000000000NC03 /* ModifiedDragOutputNotificationCenter.m in Sources */,
 				4FF0255127B0033000923107 /* ModifiedDragOutputTwoFingerSwipe.m in Sources */,
 				4FC8A7CE28AAF1BC007DB982 /* MarkdownParser.swift in Sources */,
 				4FF6654D25F2C7B000689B77 /* SharedUtility.m in Sources */,
