@@ -102,7 +102,7 @@ static void inputReportCallback(void *ctx, IOReturn result, void *sender,
         return;
     }
     
-    /// CID bytes are at offset 4,5 in both short and long reports
+    /// CID bytes at offset 4,5 — format: [reportID, deviceIdx, featureIdx, funcId, CID_high, CID_low, ...]
     if (len < 6) return;
     uint16_t cid = ((uint16_t)report[4] << 8) | report[5];
     if (cid == 0) {
@@ -258,7 +258,13 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
         return;
     }
     
-    if (IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone) != kIOReturnSuccess) return;
+    if (IOHIDDeviceOpen(device, kIOHIDOptionsTypeSeizeDevice) != kIOReturnSuccess) {
+        /// Fallback to non-exclusive if seize fails
+        if (IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone) != kIOReturnSuccess) {
+            NSLog(@"LogitechCIDActivator: ⚠️ Could not open device (both seize and normal failed)");
+            return;
+        }
+    }
 
     MFCIDDeviceState *s = calloc(1, sizeof(MFCIDDeviceState));
     s->device = device;
