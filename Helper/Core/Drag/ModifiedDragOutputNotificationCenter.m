@@ -8,72 +8,47 @@
 
 #import "ModifiedDragOutputNotificationCenter.h"
 #import "TouchSimulator.h"
-#import "GestureScrollSimulator.h"
 #import "Constants.h"
 #import "IOHIDEventTypes.h"
-#import <AppKit/AppKit.h>
+#import "Mac_Mouse_Fix_Helper-Swift.h"
+
+/// Private API for posting symbolic hotkeys
+extern CGError CGSSetSymbolicHotKeyEnabled(int hotkey, bool enabled);
+extern CGError CGSIsSymbolicHotKeyEnabled(int hotkey, bool *enabled);
 
 @implementation ModifiedDragOutputNotificationCenter
 
 #pragma mark - Vars
 
 static ModifiedDragState *_drag;
-static BOOL _gestureStarted;
-static CGPoint _savedCursorPos;
+static BOOL _triggered;
 
 #pragma mark - Interface
 
 + (void)initializeWithDragState:(ModifiedDragState *)dragStateRef {
     _drag = dragStateRef;
-    _gestureStarted = NO;
+    _triggered = NO;
 }
 
 + (void)handleBecameInUse {
-    _gestureStarted = NO;
-    
-    /// Save cursor position and warp to right edge of main screen
-    /// NC gesture only triggers from the right edge
-    CGEventRef locEvent = CGEventCreate(NULL);
-    _savedCursorPos = CGEventGetLocation(locEvent);
-    CFRelease(locEvent);
-    
-    NSScreen *screen = NSScreen.mainScreen;
-    CGFloat rightEdge = screen.frame.origin.x + screen.frame.size.width - 1;
-    CGFloat cursorY = _savedCursorPos.y;
-    CGWarpMouseCursorPosition(CGPointMake(rightEdge, cursorY));
+    _triggered = NO;
 }
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
     
-    /// Use horizontal movement — negative deltaX (moving left) = open NC
-    int64_t dx = (int64_t)(-deltaX * 0.8);
+    /// Only trigger once per drag — on first significant horizontal movement
+    if (_triggered) return;
+    if (fabs(deltaX) < 2.0) return;
     
-    if (dx == 0) return;
+    _triggered = YES;
     
-    IOHIDEventPhaseBits phase = _gestureStarted ? kIOHIDEventPhaseChanged : kIOHIDEventPhaseBegan;
-    _gestureStarted = YES;
-    
-    /// Post gesture scroll at the right edge — this is how the trackpad triggers NC
-    [GestureScrollSimulator postGestureScrollEventWithDeltaX:dx
-                                                      deltaY:0
-                                                       phase:phase
-                                          autoMomentumScroll:NO
-                                          invertedFromDevice:YES];
+    /// Toggle Notification Centre via symbolic hotkey 163
+    /// This is the same as the keyboard shortcut or trackpad gesture result
+    [SymbolicHotKeys post:163];
 }
 
 + (void)handleDeactivationWhileInUseWithCancel:(BOOL)cancel {
-    if (_gestureStarted) {
-        IOHIDEventPhaseBits endPhase = cancel ? kIOHIDEventPhaseCancelled : kIOHIDEventPhaseEnded;
-        [GestureScrollSimulator postGestureScrollEventWithDeltaX:0
-                                                          deltaY:0
-                                                           phase:endPhase
-                                              autoMomentumScroll:NO
-                                              invertedFromDevice:YES];
-    }
-    _gestureStarted = NO;
-    
-    /// Restore cursor position
-    CGWarpMouseCursorPosition(_savedCursorPos);
+    _triggered = NO;
 }
 
 + (void)suspend {
