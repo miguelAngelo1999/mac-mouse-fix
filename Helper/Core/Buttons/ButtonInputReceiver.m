@@ -17,6 +17,7 @@
 #import "HelperUtility.h"
 #import "GestureScrollSimulator.h"
 #import "Mac_Mouse_Fix_Helper-Swift.h"
+#import "ModTapCoordinator.h"
 
 @implementation ButtonInputReceiver
 
@@ -184,6 +185,13 @@ static CGEventRef eventTapCallback(CGEventTapProxy proxy, CGEventType type, CGEv
     
     /// Log
     DDLogDebug(@"Input Receiver - Device for CG Button Input - iohidDevice: %@, device: %@", iohidDevice, device);
+    
+    /// Pass through ModTapCoordinator first (smart modifier detection)
+    BOOL consumed = [[ModTapCoordinator shared] handleButtonInput:buttonNumber
+                                                          device:device
+                                                       mouseDown:mouseDown
+                                                           event:event];
+    if (consumed) return nil;
     
     /// Pass to buttonInput processor
     MFEventPassThroughEvaluation eval = [Buttons handleInputWithDevice:device button:@(buttonNumber) downNotUp:mouseDown event:event];
