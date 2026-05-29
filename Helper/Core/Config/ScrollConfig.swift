@@ -177,6 +177,10 @@ import CocoaLumberjackSwift
                 animationCurveOverride = kMFScrollAnimationCurveNameNone
             } else if modifiers.effectMod == kMFScrollEffectModificationWindowResize {
                 animationCurveOverride = kMFScrollAnimationCurveNameNone
+            } else if modifiers.effectMod == kMFScrollEffectModificationAudioDeviceSwitch {
+                animationCurveOverride = kMFScrollAnimationCurveNameNone
+            } else if modifiers.effectMod == kMFScrollEffectModificationWindowCycle {
+                animationCurveOverride = kMFScrollAnimationCurveNameNone
             } else {
                 assert(false);
             }

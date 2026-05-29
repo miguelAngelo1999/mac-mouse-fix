@@ -115,6 +115,13 @@ static NSArray *getScrollEffectsTable() {
         @{@"ui": NSLocalizedString(@"scroll-effect.arrow-keys-horizontal", @"Arrow Keys (Horizontal)"), @"tool": NSLocalizedString(@"scroll-effect.arrow-keys-horizontal.hint", @"Send Left/Right arrow key presses from scroll\n \nGreat for timeline scrubbing in video players like QuickTime and YouTube"), @"dict": @{
             kMFModifiedScrollDictKeyEffectModificationType: kMFModifiedScrollEffectModificationTypeArrowKeysHorizontal
         }},
+        separatorEffectsTableEntry(),
+        @{@"ui": NSLocalizedString(@"scroll-effect.audio-device-switch", @"Switch Audio Output"), @"tool": NSLocalizedString(@"scroll-effect.audio-device-switch.hint", @"Cycle between audio output devices\n \nScroll up for next device, scroll down for previous"), @"dict": @{
+            kMFModifiedScrollDictKeyEffectModificationType: kMFModifiedScrollEffectModificationTypeAudioDeviceSwitch
+        }},
+        @{@"ui": NSLocalizedString(@"scroll-effect.window-cycle", @"Cycle Windows"), @"tool": NSLocalizedString(@"scroll-effect.window-cycle.hint", @"Cycle through windows of the frontmost app\n \nWorks like pressing ⌘` on your keyboard"), @"dict": @{
+            kMFModifiedScrollDictKeyEffectModificationType: kMFModifiedScrollEffectModificationTypeWindowCycle
+        }},
 //        separatorEffectsTableEntry(),
 //        @{@"ui": NSLocalizedString(@"scroll-effect.app-switcher", @"First draft: App Switcher"), @"tool": NSLocalizedString(@"scroll-effect.app-switcher.hint", @"First draft: Quickly switch between open apps\n \nWorks like holding Command (⌘) and then pressing Tab (⇥) on your keyboard"), @"dict": @{
 //            kMFModifiedScrollDictKeyEffectModificationType: kMFModifiedScrollEffectModificationTypeCommandTab
@@ -184,6 +191,9 @@ static NSArray *getOneShotEffectsTable(NSDictionary *rowDict) {
         @{@"ui": NSLocalizedString(@"effect.smart-zoom", @"First draft: Smart Zoom"), @"tool": NSLocalizedString(@"effect.smart-zoom.hint", @"First draft: Zoom in or out in Safari and other apps.\n \nWorks like a two-finger double tap on an Apple Trackpad."), @"dict": @{
                   kMFActionDictKeyType: kMFActionDictTypeSmartZoom,
         }},
+        @{@"ui": NSLocalizedString(@"effect.force-touch", @"Force Touch"), @"tool": NSLocalizedString(@"effect.force-touch.hint", @"Simulate a Force Touch (deep press)\n \nTriggers Look Up in Safari and Mail, Quick Look in Finder, and other Force Touch actions\n \nWorks like a Force click on an Apple Trackpad"), @"dict": @{
+                  kMFActionDictKeyType: kMFActionDictTypeForceTouch,
+        }},
         @{@"ui": NSLocalizedString(@"effect.stop-scroll", @"Stop Scroll"), @"tool": NSLocalizedString(@"effect.stop-scroll.hint", @"Instantly stop any ongoing scroll momentum\n \nLike touching the trackpad surface to stop a page from coasting"), @"dict": @{
                   kMFActionDictKeyType: kMFActionDictTypeStopScroll,
         }},
@@ -242,6 +252,14 @@ static NSArray *getOneShotEffectsTable(NSDictionary *rowDict) {
         @{@"ui": NSLocalizedString(@"effect.launchpad", @"First draft: Launchpad"), @"tool": NSLocalizedString(@"effect.launchpad.hint", @"First draft: Open Launchpad"), @"dict": @{
                   kMFActionDictKeyType: kMFActionDictTypeSymbolicHotkey,
                   kMFActionDictKeyGenericVariant: @(kMFSHLaunchpad)
+        }},
+        @{@"ui": NSLocalizedString(@"effect.notification-center", @"Notification Center"), @"tool": NSLocalizedString(@"effect.notification-center.hint", @"Open or close Notification Center"), @"dict": @{
+                  kMFActionDictKeyType: kMFActionDictTypeSymbolicHotkey,
+                  kMFActionDictKeyGenericVariant: @(kMFSHNotificationCenter)
+        }},
+        @{@"ui": NSLocalizedString(@"effect.do-not-disturb", @"Toggle Do Not Disturb"), @"tool": NSLocalizedString(@"effect.do-not-disturb.hint", @"Toggle Do Not Disturb (Focus) mode on or off"), @"dict": @{
+                  kMFActionDictKeyType: kMFActionDictTypeSymbolicHotkey,
+                  kMFActionDictKeyGenericVariant: @(kMFSHToggleDoNotDisturb)
         }},
         separatorEffectsTableEntry(),
         @{@"ui": NSLocalizedString(@"effect.left-space", @"First draft: Move Left a Space"), @"tool": NSLocalizedString(@"effect.left-space.hint", @"First draft: Move one Space to the left"), @"dict": @{

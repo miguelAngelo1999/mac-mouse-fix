@@ -224,6 +224,18 @@
 /* First draft: Show the desktop */
 "effect.desktop.hint" = "Show the desktop";
 
+/* Toggle Do Not Disturb */
+"effect.do-not-disturb" = "effect.do-not-disturb";
+
+/* Toggle Do Not Disturb (Focus) mode on or off */
+"effect.do-not-disturb.hint" = "effect.do-not-disturb.hint";
+
+/* Force Touch */
+"effect.force-touch" = "effect.force-touch";
+
+/* Simulate a Force Touch (deep press)\n \nTriggers Look Up in Safari and Mail, Quick Look in Finder, and other Force Touch actions\n \nWorks like a Force click on an Apple Trackpad */
+"effect.force-touch.hint" = "effect.force-touch.hint";
+
 /* First draft: Forward */
 "effect.forward" = "Forward";
 
@@ -259,6 +271,12 @@
 
 /* First draft: Show Mission Control */
 "effect.mission-control.hint" = "Show Mission Control";
+
+/* Notification Center */
+"effect.notification-center" = "effect.notification-center";
+
+/* Open or close Notification Center */
+"effect.notification-center.hint" = "effect.notification-center.hint";
 
 /* First draft: Primary Click */
 "effect.primary-click" = "Primary Click";
@@ -467,6 +485,12 @@
 /* Send Up/Down arrow key presses from scroll\n \nGreat for navigating lists, slides, and presentations */
 "scroll-effect.arrow-keys.hint" = "Send Up/Down arrow key presses from scroll\n \nGreat for navigating lists, slides, and presentations";
 
+/* Switch Audio Output */
+"scroll-effect.audio-device-switch" = "Switch Audio Output";
+
+/* Cycle between audio output devices\n \nScroll up for next device, scroll down for previous */
+"scroll-effect.audio-device-switch.hint" = "Cycle between audio output devices\n \nScroll up for next device, scroll down for previous";
+
 /* Brightness */
 "scroll-effect.brightness" = "Brightness";
 
@@ -508,6 +532,12 @@
 
 /* Smoothly adjust system volume\n \nScroll up to increase, scroll down to decrease */
 "scroll-effect.volume.hint" = "Smoothly adjust system volume\n \nScroll up to increase, scroll down to decrease";
+
+/* Cycle Windows */
+"scroll-effect.window-cycle" = "Cycle Windows";
+
+/* Cycle through windows of the frontmost app\n \nWorks like pressing ⌘` on your keyboard */
+"scroll-effect.window-cycle.hint" = "Cycle through windows of the frontmost app\n \nWorks like pressing ⌘` on your keyboard";
 
 /* Resize Window */
 "scroll-effect.window-resize" = "Resize Window";

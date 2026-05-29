@@ -613,6 +613,25 @@ BOOL _addModeIsEnabled = NO;
                 kMFModifiedDragDictKeyType: kMFModifiedDragTypeThreeFingerSwipe,
             }
         },
+        
+        /// Button 6 precond (Logitech thumb / first CID button — modifier layer)
+        
+        @{
+            kMFModificationPreconditionKeyButtons: @[
+                @{
+                    kMFButtonModificationPreconditionKeyButtonNumber: @(6),
+                    kMFButtonModificationPreconditionKeyClickLevel: @(1),
+                },
+            ],
+            
+        }: @{
+            kMFTriggerScroll: @{
+                kMFModifiedScrollDictKeyEffectModificationType: kMFModifiedScrollEffectModificationTypeVolume
+            },
+            kMFTriggerDrag: @{
+                kMFModifiedDragDictKeyType: kMFModifiedDragTypeRotateZoom,
+            },
+        },
     };
 }
 

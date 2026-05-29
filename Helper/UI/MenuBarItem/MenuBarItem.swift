@@ -154,4 +154,21 @@ import Foundation
         /// Implement?
     }
     
+    // MARK: Active modifier indicator
+    
+    /// Shows a brief text indicator next to the menu bar icon when a button modifier is active.
+    /// This helps the user know which "layer" they're on.
+    
+    @objc static func showModifierIndicator(_ text: String?) {
+        guard let instance = instance, let button = instance.statusItem?.button else { return }
+        
+        if let text = text, !text.isEmpty {
+            button.title = " \(text)"
+            button.imagePosition = .imageLeading
+        } else {
+            button.title = ""
+            button.imagePosition = .imageOnly
+        }
+    }
+    
 }

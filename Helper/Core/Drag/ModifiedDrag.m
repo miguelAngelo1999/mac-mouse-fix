@@ -415,6 +415,16 @@ void handleMouseInputWhileInUse(int64_t deltaX, int64_t deltaY, CGEventRef event
     [self deactivateWithCancel:false];
 }
 
++ (BOOL)isInUse {
+    /// Lightweight synchronous check — used by Scroll.m to suppress scroll events
+    /// while a modified drag is actively in use (prevents e.g. volume scroll firing
+    /// during RotateZoom drag on the same button).
+    /// Note: This reads _drag.activationState without dispatching to _drag.queue,
+    /// so it's technically a race, but it's only used as a hint to suppress output
+    /// and the worst case is one extra scroll event slipping through.
+    return _drag.activationState == kMFModifiedInputActivationStateInUse;
+}
+
 + (void)deactivateWithCancel:(BOOL)cancel {
     
     dispatch_async(_drag.queue, ^{

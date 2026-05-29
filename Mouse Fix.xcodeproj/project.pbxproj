@@ -311,6 +311,9 @@
 		4FF665EF25F2C92700689B77 /* ScrollOverridePanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 4FF665C325F2C92700689B77 /* ScrollOverridePanel.xib */; };
 		4FF665F725F2C92700689B77 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4FF665D525F2C92700689B77 /* Assets.xcassets */; };
 		4FF665FA25F2C92700689B77 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FF665DB25F2C92700689B77 /* AppDelegate.m */; };
+		EE000001000000000000EE03 /* ConfigExporter.m in Sources */ = {isa = PBXBuildFile; fileRef = EE000001000000000000EE02 /* ConfigExporter.m */; };
+		EE000001000000000000EE01 /* ConfigExporter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ConfigExporter.h; sourceTree = "<group>"; };
+		EE000001000000000000EE02 /* ConfigExporter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ConfigExporter.m; sourceTree = "<group>"; };
 		4FF665FD25F2C92700689B77 /* AuthorizeAccessibilityView.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FF665E025F2C92700689B77 /* AuthorizeAccessibilityView.m */; };
 		4FF665FE25F2C92700689B77 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FF665E325F2C92700689B77 /* main.m */; };
 		4FF6660025F2C92700689B77 /* Hyperlink.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FF665E725F2C92700689B77 /* Hyperlink.m */; };
@@ -328,6 +331,7 @@
 		4FF6669125F2C93A00689B77 /* ScrollUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FF6662F25F2C93A00689B77 /* ScrollUtility.m */; };
 		BB000001000000000000BB03 /* LogitechCIDActivator.m in Sources */ = {isa = PBXBuildFile; fileRef = BB000001000000000000BB02 /* LogitechCIDActivator.m */; };
 		AA000001000000000000AA03 /* ScrollOutputUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000AA02 /* ScrollOutputUtility.m */; };
+		FF000001000000000000FF03 /* ContextualScrollActions.m in Sources */ = {isa = PBXBuildFile; fileRef = FF000001000000000000FF02 /* ContextualScrollActions.m */; };
 		AA000001000000000000AA06 /* ModifiedDragOutputVolumeBrightness.m in Sources */ = {isa = PBXBuildFile; fileRef = AA000001000000000000AA05 /* ModifiedDragOutputVolumeBrightness.m */; };
 		4FF6669225F2C93A00689B77 /* RoughScroll_old_.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FF6663025F2C93A00689B77 /* RoughScroll_old_.m */; };
 		4FF6669325F2C93A00689B77 /* TouchSimulator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FF6663325F2C93A00689B77 /* TouchSimulator.m */; };
@@ -2412,6 +2416,8 @@
 		BB000001000000000000BB02 /* LogitechCIDActivator.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = LogitechCIDActivator.m; sourceTree = "<group>"; };
 		AA000001000000000000AA01 /* ScrollOutputUtility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollOutputUtility.h; sourceTree = "<group>"; };
 		AA000001000000000000AA02 /* ScrollOutputUtility.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScrollOutputUtility.m; sourceTree = "<group>"; };
+		FF000001000000000000FF01 /* ContextualScrollActions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ContextualScrollActions.h; sourceTree = "<group>"; };
+		FF000001000000000000FF02 /* ContextualScrollActions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ContextualScrollActions.m; sourceTree = "<group>"; };
 		AA000001000000000000AA04 /* ModifiedDragOutputVolumeBrightness.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModifiedDragOutputVolumeBrightness.h; sourceTree = "<group>"; };
 		AA000001000000000000AA05 /* ModifiedDragOutputVolumeBrightness.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModifiedDragOutputVolumeBrightness.m; sourceTree = "<group>"; };
 		4FF6663025F2C93A00689B77 /* RoughScroll_old_.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RoughScroll_old_.m; sourceTree = "<group>"; };
@@ -7276,6 +7282,8 @@
 				4FF665E325F2C92700689B77 /* main.m */,
 				4FF665C525F2C92700689B77 /* AppDelegate.h */,
 				4FF665DB25F2C92700689B77 /* AppDelegate.m */,
+				EE000001000000000000EE01 /* ConfigExporter.h */,
+				EE000001000000000000EE02 /* ConfigExporter.m */,
 				4F39BC48263B179200FDF692 /* AppState.h */,
 				4F39BC49263B179200FDF692 /* AppState.m */,
 				4F909CEF28A0C3B6009349A2 /* MainAppState.swift */,
@@ -7471,6 +7479,8 @@
 				4FF6662F25F2C93A00689B77 /* ScrollUtility.m */,
 					AA000001000000000000AA01 /* ScrollOutputUtility.h */,
 					AA000001000000000000AA02 /* ScrollOutputUtility.m */,
+					FF000001000000000000FF01 /* ContextualScrollActions.h */,
+					FF000001000000000000FF02 /* ContextualScrollActions.m */,
 				4FF6662225F2C93A00689B77 /* Unused */,
 				4F3CDB272837D889000E28F0 /* ScrollNotes.md */,
 			);
@@ -8058,6 +8068,7 @@
 				4FA1FD8328A916B600D1C8EE /* NSShadow+Extensions.swift in Sources */,
 				4F5971E52901763D00A32656 /* MathObjc.m in Sources */,
 				4FF665FA25F2C92700689B77 /* AppDelegate.m in Sources */,
+				EE000001000000000000EE03 /* ConfigExporter.m in Sources */,
 				4F909CF028A0C3B7009349A2 /* MainAppState.swift in Sources */,
 				4FEC9668278BBDC600548604 /* NSColor+Additions.m in Sources */,
 				4FF1DC7B2CC1130700A839AB /* License.m in Sources */,
@@ -8303,6 +8314,7 @@
 				4FF6669125F2C93A00689B77 /* ScrollUtility.m in Sources */,
 					BB000001000000000000BB03 /* LogitechCIDActivator.m in Sources */,
 					AA000001000000000000AA03 /* ScrollOutputUtility.m in Sources */,
+					FF000001000000000000FF03 /* ContextualScrollActions.m in Sources */,
 					AA000001000000000000AA06 /* ModifiedDragOutputVolumeBrightness.m in Sources */,
 				4FB8B29B2CCEBAEB00A5A580 /* GetLicenseConfig.swift in Sources */,
 				4F1B41902D49960E00026C94 /* MFSemaphore.m in Sources */,

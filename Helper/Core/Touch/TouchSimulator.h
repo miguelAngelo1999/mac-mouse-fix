@@ -23,6 +23,7 @@ typedef enum {
 + (void)postNavigationSwipeEventWithDirection:(IOHIDSwipeMask)dir;
 
 + (void)postSmartZoomEvent;
++ (void)postForceTouchEvent;
 + (void)postRotationEventWithRotation:(double)rotation phase:(IOHIDEventPhaseBits)phase;
 + (void)postMagnificationEventWithMagnification:(double)magnification phase:(IOHIDEventPhaseBits)phase;
 + (void)postDockSwipeEventWithDelta:(double)d type:(MFDockSwipeType)type phase:(IOHIDEventPhaseBits)phase invertedFromDevice:(BOOL)invertedFromDevice;

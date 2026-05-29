@@ -148,6 +148,13 @@
             
             [TouchSimulator postSmartZoomEvent];
             
+        } else if ([actionType isEqualToString:kMFActionDictTypeForceTouch]) {
+            
+            /// Simulate a Force Touch (deep press) for Look Up, Quick Look, etc.
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+                [TouchSimulator postForceTouchEvent];
+            });
+            
         } else if ([actionType isEqualToString:kMFActionDictTypeStopScroll]) {
             
             /// Immediately arrest any ongoing scroll momentum

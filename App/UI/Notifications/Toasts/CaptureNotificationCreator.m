@@ -103,8 +103,8 @@
         /// Trim
         body = [body attributedStringByTrimmingWhitespace];
         
-        /// Show notification
-        [ToastNotificationController attachNotificationWithMessage:body toWindow:MainAppState.shared.window forDuration:kMFToastDurationAutomatic];
+        /// Show notification (bottom-aligned so it doesn't block tab navigation)
+        [ToastNotificationController attachNotificationWithMessage:body toWindow:MainAppState.shared.window forDuration:kMFToastDurationAutomatic alignment:kToastNotificationAlignmentBottomMiddle];
     }
 }
 

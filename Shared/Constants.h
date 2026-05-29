@@ -172,6 +172,8 @@ typedef NSString*                                                       MFString
 #define kMFModifiedScrollEffectModificationTypeArrowKeys                                    @"arrowKeys"
 #define kMFModifiedScrollEffectModificationTypeArrowKeysHorizontal                          @"arrowKeysHorizontal"
 #define kMFModifiedScrollEffectModificationTypeWindowResize                                 @"windowResize"
+#define kMFModifiedScrollEffectModificationTypeAudioDeviceSwitch                            @"audioDeviceSwitch"
+#define kMFModifiedScrollEffectModificationTypeWindowCycle                                  @"windowCycle"
 
 // Oneshot Actions
 // TODO: Used to be named ActionDict... Rename to OneShot..., or OneShotDict
@@ -195,6 +197,7 @@ typedef NSString*                                                       MFString
 #define kMFActionDictTypeSystemDefinedEvent                             @"systemDefinedEvent"
 #define kMFActionDictTypeMouseButtonClicks                              @"mouseButton"
 #define kMFActionDictTypeAddModeFeedback                                @"addModeAction"
+#define kMFActionDictTypeForceTouch                                     @"forceTouch"
 
 // Variant keys
 

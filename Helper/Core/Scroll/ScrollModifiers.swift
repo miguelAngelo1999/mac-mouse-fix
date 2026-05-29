@@ -105,6 +105,10 @@ extension MFScrollModificationResult: Hashable {
                 result.effectMod = kMFScrollEffectModificationArrowKeysHorizontal
             case kMFModifiedScrollEffectModificationTypeWindowResize:
                 result.effectMod = kMFScrollEffectModificationWindowResize
+            case kMFModifiedScrollEffectModificationTypeAudioDeviceSwitch:
+                result.effectMod = kMFScrollEffectModificationAudioDeviceSwitch
+            case kMFModifiedScrollEffectModificationTypeWindowCycle:
+                result.effectMod = kMFScrollEffectModificationWindowCycle
             default:
                 fatalError("Unknown modifiedSrollDict type found in remaps")
             }

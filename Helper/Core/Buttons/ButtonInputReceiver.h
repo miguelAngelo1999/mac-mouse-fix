@@ -46,6 +46,9 @@ typedef enum {
 + (void)stop;
 + (BOOL)isRunning;
 
++ (void)setPrimaryButtonModifierLayerActive:(BOOL)active;
++ (BOOL)primaryButtonModifierLayerActive;
+
 //+ (void)decide;
 
 //+ (void)insertFakeEventWithButton:(MFMouseButtonNumber)button isMouseDown:(BOOL)isMouseDown;

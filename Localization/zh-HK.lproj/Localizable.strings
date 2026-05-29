@@ -233,6 +233,18 @@
 /* First draft: Show the desktop */
 "effect.desktop.hint" = "顯示桌面";
 
+/* Toggle Do Not Disturb */
+"effect.do-not-disturb" = "effect.do-not-disturb";
+
+/* Toggle Do Not Disturb (Focus) mode on or off */
+"effect.do-not-disturb.hint" = "effect.do-not-disturb.hint";
+
+/* Force Touch */
+"effect.force-touch" = "effect.force-touch";
+
+/* Simulate a Force Touch (deep press)\n \nTriggers Look Up in Safari and Mail, Quick Look in Finder, and other Force Touch actions\n \nWorks like a Force click on an Apple Trackpad */
+"effect.force-touch.hint" = "effect.force-touch.hint";
+
 /* First draft: Forward */
 "effect.forward" = "往前";
 
@@ -268,6 +280,12 @@
 
 /* First draft: Show Mission Control */
 "effect.mission-control.hint" = "顯示「指揮中心」";
+
+/* Notification Center */
+"effect.notification-center" = "effect.notification-center";
+
+/* Open or close Notification Center */
+"effect.notification-center.hint" = "effect.notification-center.hint";
 
 /* First draft: Primary Click */
 "effect.primary-click" = "effect.primary-click";
@@ -476,6 +494,12 @@
 /* Send Up/Down arrow key presses from scroll\n \nGreat for navigating lists, slides, and presentations */
 "scroll-effect.arrow-keys.hint" = "scroll-effect.arrow-keys.hint";
 
+/* Switch Audio Output */
+"scroll-effect.audio-device-switch" = "scroll-effect.audio-device-switch";
+
+/* Cycle between audio output devices\n \nScroll up for next device, scroll down for previous */
+"scroll-effect.audio-device-switch.hint" = "scroll-effect.audio-device-switch.hint";
+
 /* Brightness */
 "scroll-effect.brightness" = "scroll-effect.brightness";
 
@@ -517,6 +541,12 @@
 
 /* Smoothly adjust system volume\n \nScroll up to increase, scroll down to decrease */
 "scroll-effect.volume.hint" = "scroll-effect.volume.hint";
+
+/* Cycle Windows */
+"scroll-effect.window-cycle" = "scroll-effect.window-cycle";
+
+/* Cycle through windows of the frontmost app\n \nWorks like pressing ⌘` on your keyboard */
+"scroll-effect.window-cycle.hint" = "scroll-effect.window-cycle.hint";
 
 /* Resize Window */
 "scroll-effect.window-resize" = "scroll-effect.window-resize";

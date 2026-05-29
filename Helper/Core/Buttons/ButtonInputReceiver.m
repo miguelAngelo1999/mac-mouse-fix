@@ -28,10 +28,12 @@
 /// - Some time after moving to the newMethod I deleted the old method. You can still find it in ButtonInputReceiver_old.m and in the the MMF 1 and MMF 2 source. We might have moved away from it under MMF 2 as well to fix Ventura problems, not sure. 
 
 static CFMachPortRef _eventTap;
+static BOOL _primaryButtonModifierLayerActive; /// When YES, buttons 1 & 2 are intercepted for remapping
 
 + (void)load_Manual {
+    _primaryButtonModifierLayerActive = NO;
     registerInputCallback();
-    _buttonParseBlacklist = @[@(1),@(2)]; /// Ignore inputs from left and right mouse buttons
+    _buttonParseBlacklist = @[]; /// Empty — we handle filtering dynamically in the callback
 }
 
 + (void)start {
@@ -45,6 +47,15 @@ static CFMachPortRef _eventTap;
     return CGEventTapIsEnabled(_eventTap);
 }
 
++ (void)setPrimaryButtonModifierLayerActive:(BOOL)active {
+    /// Called by Modifiers.m when a button modifier (4/5/6+) becomes active or inactive.
+    /// When active, left/right/middle clicks are intercepted for remapping.
+    _primaryButtonModifierLayerActive = active;
+}
++ (BOOL)primaryButtonModifierLayerActive {
+    return _primaryButtonModifierLayerActive;
+}
+
 static void registerInputCallback() {
     
     ///
@@ -56,9 +67,9 @@ static void registerInputCallback() {
     ///     Edit: will just see what happens when we turn it off.
     
     CGEventMask mask =
-    CGEventMaskBit(kCGEventOtherMouseDown) | CGEventMaskBit(kCGEventOtherMouseUp);
-//    | CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventLeftMouseUp)
-//    | CGEventMaskBit(kCGEventRightMouseDown) | CGEventMaskBit(kCGEventRightMouseUp);
+    CGEventMaskBit(kCGEventOtherMouseDown) | CGEventMaskBit(kCGEventOtherMouseUp)
+    | CGEventMaskBit(kCGEventLeftMouseDown) | CGEventMaskBit(kCGEventLeftMouseUp)
+    | CGEventMaskBit(kCGEventRightMouseDown) | CGEventMaskBit(kCGEventRightMouseUp);
 
     /// Create tap
     _eventTap = CGEventTapCreate(kCGHIDEventTap, kCGHeadInsertEventTap, kCGEventTapOptionDefault, mask, eventTapCallback, NULL);
@@ -123,6 +134,11 @@ static CGEventRef eventTapCallback(CGEventTapProxy proxy, CGEventType type, CGEv
     BOOL mouseDown = CGEventGetIntegerValueField(event, kCGMouseEventPressure) != 0;
     
     /// Filter buttons
+    /// When no button modifier is held, let primary buttons (1, 2) pass through untouched.
+    /// When a modifier layer IS active, intercept them for remapping.
+    if (!_primaryButtonModifierLayerActive && (buttonNumber == 1 || buttonNumber == 2)) {
+        return event;
+    }
     if ([_buttonParseBlacklist containsObject:@(buttonNumber)]) return event;
     
     /// Debug

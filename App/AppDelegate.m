@@ -23,6 +23,7 @@
 #import "NSAttributedString+Additions.h"
 #import "Mac_Mouse_Fix-Swift.h"
 #import "Locator.h"
+#import "ConfigExporter.h"
 
 @interface AppDelegate ()
 
@@ -220,6 +221,32 @@ static NSDictionary *sideButtonActions;
     
     DDLogInfo(@"Mac Mouse Fix finished launching");
     
+    /// Add Import/Export menu items to the File menu
+    {
+        NSMenu *mainMenu = [NSApp mainMenu];
+        NSMenuItem *fileMenuItem = [mainMenu itemWithTitle:@"File"];
+        if (!fileMenuItem) {
+            fileMenuItem = [[NSMenuItem alloc] initWithTitle:@"File" action:nil keyEquivalent:@""];
+            NSMenu *fileMenu = [[NSMenu alloc] initWithTitle:@"File"];
+            fileMenuItem.submenu = fileMenu;
+            [mainMenu insertItem:fileMenuItem atIndex:1];
+        }
+        NSMenu *fileMenu = fileMenuItem.submenu;
+        if (!fileMenu) {
+            fileMenu = [[NSMenu alloc] initWithTitle:@"File"];
+            fileMenuItem.submenu = fileMenu;
+        }
+        [fileMenu addItem:[NSMenuItem separatorItem]];
+        NSMenuItem *exportItem = [[NSMenuItem alloc] initWithTitle:@"Export Button Config…" action:@selector(exportConfig:) keyEquivalent:@"e"];
+        exportItem.keyEquivalentModifierMask = NSEventModifierFlagCommand | NSEventModifierFlagShift;
+        exportItem.target = self;
+        [fileMenu addItem:exportItem];
+        NSMenuItem *importItem = [[NSMenuItem alloc] initWithTitle:@"Import Button Config…" action:@selector(importConfig:) keyEquivalent:@"i"];
+        importItem.keyEquivalentModifierMask = NSEventModifierFlagCommand | NSEventModifierFlagShift;
+        importItem.target = self;
+        [fileMenu addItem:importItem];
+    }
+    
 #pragma mark Experiments
 
     /// Test titlebarAccessory
@@ -344,6 +371,16 @@ static NSDictionary *sideButtonActions;
 
 - (BOOL) applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)app {
     return YES;
+}
+
+#pragma mark - Import/Export
+
+- (void)exportConfig:(id)sender {
+    [ConfigExporter exportRemapsToJSON];
+}
+
+- (void)importConfig:(id)sender {
+    [ConfigExporter importRemapsFromJSON];
 }
 
 @end

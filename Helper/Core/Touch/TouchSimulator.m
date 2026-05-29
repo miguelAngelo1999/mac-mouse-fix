@@ -60,6 +60,60 @@ static NSMutableDictionary *_swipeInfo;
     CFRelease(e);
 }
 
++ (void)postForceTouchEvent {
+    /// Simulates a Force Touch (deep press) at the current mouse location.
+    /// This triggers Look Up in Safari/Mail and Quick Look in Finder,
+    /// working like a real trackpad force click.
+    ///
+    /// The sequence is: pressure stage 0→1→2 (force touch), then back 2→1→0.
+    /// We use NSEventTypePressure (type 34) with the appropriate stage fields.
+    
+    CGEventRef locEvent = CGEventCreate(NULL);
+    CGPoint loc = CGEventGetLocation(locEvent);
+    CFRelease(locEvent);
+    
+    /// Stage 1: initial press
+    CGEventRef e1 = CGEventCreate(NULL);
+    CGEventSetType(e1, 34); /// NSEventTypePressure
+    CGEventSetLocation(e1, loc);
+    CGEventSetIntegerValueField(e1, 99, 1);  /// pressure stage = 1
+    CGEventSetDoubleValueField(e1, 113, 0.5); /// pressure value
+    CGEventPost(kCGHIDEventTap, e1);
+    CFRelease(e1);
+    
+    /// Stage 2: force touch (deep press)
+    CGEventRef e2 = CGEventCreate(NULL);
+    CGEventSetType(e2, 34); /// NSEventTypePressure
+    CGEventSetLocation(e2, loc);
+    CGEventSetIntegerValueField(e2, 99, 2);  /// pressure stage = 2 (force touch)
+    CGEventSetDoubleValueField(e2, 113, 1.0); /// full pressure
+    CGEventSetIntegerValueField(e2, 100, 1); /// stageTransition = entering stage 2
+    CGEventPost(kCGHIDEventTap, e2);
+    CFRelease(e2);
+    
+    /// Brief delay to let the system register the force touch
+    usleep(50000); /// 50ms
+    
+    /// Release: back to stage 1
+    CGEventRef e3 = CGEventCreate(NULL);
+    CGEventSetType(e3, 34); /// NSEventTypePressure
+    CGEventSetLocation(e3, loc);
+    CGEventSetIntegerValueField(e3, 99, 1);  /// pressure stage = 1
+    CGEventSetDoubleValueField(e3, 113, 0.3);
+    CGEventSetIntegerValueField(e3, 100, -1); /// stageTransition = leaving stage 2
+    CGEventPost(kCGHIDEventTap, e3);
+    CFRelease(e3);
+    
+    /// Release: back to stage 0
+    CGEventRef e4 = CGEventCreate(NULL);
+    CGEventSetType(e4, 34); /// NSEventTypePressure
+    CGEventSetLocation(e4, loc);
+    CGEventSetIntegerValueField(e4, 99, 0);  /// pressure stage = 0
+    CGEventSetDoubleValueField(e4, 113, 0.0);
+    CGEventPost(kCGHIDEventTap, e4);
+    CFRelease(e4);
+}
+
 + (void)postRotationEventWithRotation:(double)rotation phase:(IOHIDEventPhaseBits)phase {
     
     CGEventRef e = CGEventCreate(NULL);

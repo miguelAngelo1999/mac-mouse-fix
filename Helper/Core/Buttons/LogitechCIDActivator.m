@@ -44,6 +44,8 @@ typedef struct {
 
 static uint8_t sResp[20];
 static BOOL    sGotResp = NO;
+static BOOL    sWaitingForResp = NO; /// Only consume reports as responses when we're actually waiting
+static uint8_t sExpectedFeature = 0; /// Feature index we expect the response for
 
 /// Forward declarations
 static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s);
@@ -94,8 +96,13 @@ static void inputReportCallback(void *ctx, IOReturn result, void *sender,
     }
     
     if (report[3] != 0x00) {
-        memcpy(sResp, report, len < 20 ? (size_t)len : 20);
-        sGotResp = YES;
+        /// This is either a response to a pending command or an unsolicited notification.
+        /// Only consume it as a response if we're actively waiting for one AND the feature matches.
+        if (sWaitingForResp && (report[2] == sExpectedFeature || report[2] == 0x00 || report[2] == 0xFF)) {
+            memcpy(sResp, report, len < 20 ? (size_t)len : 20);
+            sGotResp = YES;
+        }
+        /// Otherwise ignore unsolicited notifications (battery, DPI changes, etc.)
         return;
     }
     uint16_t cid = ((uint16_t)report[4] << 8) | report[5];
@@ -111,9 +118,12 @@ static void inputReportCallback(void *ctx, IOReturn result, void *sender,
 
 static IOReturn sendAndWait(IOHIDDeviceRef dev, uint8_t *pkt) {
     sGotResp = NO;
+    sWaitingForResp = YES;
+    sExpectedFeature = pkt[2]; /// Remember which feature we're querying
     IOReturn r = IOHIDDeviceSetReport(dev, kIOHIDReportTypeOutput, pkt[0], pkt, 20);
-    if (r != kIOReturnSuccess) return r;
+    if (r != kIOReturnSuccess) { sWaitingForResp = NO; return r; }
     for (int i = 0; i < 100 && !sGotResp; i++) CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, false);
+    sWaitingForResp = NO;
     if (!sGotResp) return kIOReturnTimeout;
     if (sResp[2] == 0xFF) return kIOReturnError;
     return kIOReturnSuccess;
@@ -198,9 +208,12 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
 - (void)reactivateAll {
     for (NSValue *v in _states) {
         MFCIDDeviceState *s = (MFCIDDeviceState *)v.pointerValue;
-        activateDevice(s->device, s);
+        int diverted = activateDevice(s->device, s);
+        if (diverted == 0) {
+            DDLogWarn(@"LogitechCIDActivator: reactivation FAILED for a device — CID buttons may stop working");
+        }
     }
-    DDLogDebug(@"LogitechCIDActivator: re-activated %lu device(s)", (unsigned long)_states.count);
+    DDLogDebug(@"LogitechCIDActivator: periodic re-activation for %lu device(s)", (unsigned long)_states.count);
 }
 
 - (void)handleDeviceAttached: (IOHIDDeviceRef)device {

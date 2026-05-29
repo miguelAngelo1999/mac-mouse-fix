@@ -29,6 +29,8 @@
 #import "EventUtility.h"
 #import "MathObjc.h"
 #import "ScrollOutputUtility.h"
+#import "ModifiedDrag.h"
+#import "ContextualScrollActions.h"
 
 @import IOKit;
 #import "MFHIDEventImports.h"
@@ -382,6 +384,16 @@ static void heavyProcessing(CGEventRef event, int64_t scrollDeltaAxis1, int64_t 
         _scrollConfig = [ScrollConfig scrollConfigWithModifiers:newMods inputAxis:inputAxis display:displayID];
         
     } /// End `if (firstConsecutive) {`
+    
+    /// Suppress scroll effect modifications while a modified drag is actively in use
+    /// This prevents e.g. volume/brightness scroll effects from firing when the user
+    /// is actively dragging with RotateZoom on the same button (Logitech mice can send
+    /// spurious horizontal scroll events during fast horizontal mouse movement).
+    if (_modifications.effectMod != kMFScrollEffectModificationNone
+        && [ModifiedDrag isInUse]) {
+        CFRelease(event);
+        return;
+    }
     
     ///
     /// Get effective direction
@@ -943,6 +955,10 @@ static void sendScroll(int64_t px, MFDirection scrollDirection, BOOL animated, M
         outputType = kMFScrollOutputTypeArrowKeysHorizontal;
     } else if (_modifications.effectMod == kMFScrollEffectModificationWindowResize) {
         outputType = kMFScrollOutputTypeWindowResize;
+    } else if (_modifications.effectMod == kMFScrollEffectModificationAudioDeviceSwitch) {
+        outputType = kMFScrollOutputTypeAudioDeviceSwitch;
+    } else if (_modifications.effectMod == kMFScrollEffectModificationWindowCycle) {
+        outputType = kMFScrollOutputTypeWindowCycle;
     } /// kMFScrollEffectModificationHorizontalScroll is handled above when determining scroll direction
     
     /// Send event
@@ -966,6 +982,8 @@ typedef enum {
     kMFScrollOutputTypeArrowKeys,
     kMFScrollOutputTypeArrowKeysHorizontal,
     kMFScrollOutputTypeWindowResize,
+    kMFScrollOutputTypeAudioDeviceSwitch,
+    kMFScrollOutputTypeWindowCycle,
 } MFScrollOutputType;
 
 /// Output
@@ -1427,6 +1445,28 @@ static void sendOutputEvents(int64_t dx, int64_t dy, MFScrollOutputType outputTy
         AXUIElementSetAttributeValue(window, kAXSizeAttribute, newSize);
         CFRelease(newSize);
         CFRelease(window);
+        
+    } else if (outputType == kMFScrollOutputTypeAudioDeviceSwitch) {
+        
+        /// --- Audio Device Switch: scroll to cycle output devices ---
+        double d = dx + dy;
+        if (d == 0) return;
+        static CFTimeInterval lastSwitchTime = 0;
+        CFTimeInterval now = CACurrentMediaTime();
+        if (now - lastSwitchTime < 0.3) return; /// Throttle to 300ms
+        lastSwitchTime = now;
+        [ContextualScrollActions cycleAudioOutputDevice:(d > 0)];
+        
+    } else if (outputType == kMFScrollOutputTypeWindowCycle) {
+        
+        /// --- Window Cycle: scroll to cycle windows of frontmost app ---
+        double d = dx + dy;
+        if (d == 0) return;
+        static CFTimeInterval lastCycleTime = 0;
+        CFTimeInterval now = CACurrentMediaTime();
+        if (now - lastCycleTime < 0.15) return; /// Throttle to 150ms
+        lastCycleTime = now;
+        [ContextualScrollActions cycleAppWindows:(d > 0)];
         
     } else {
         assert(false);

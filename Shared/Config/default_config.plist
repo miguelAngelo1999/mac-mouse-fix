@@ -43,6 +43,8 @@
 		<false/>
 		<key>scrollKillSwitch</key>
 		<false/>
+		<key>primaryButtonModifierLayer</key>
+		<false/>
 		<key>checkForPrereleases</key>
 		<false/>
 		<key>checkForUpdates</key>

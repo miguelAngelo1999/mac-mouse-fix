@@ -11,6 +11,7 @@
 
 #import "Modifiers.h"
 #import "ButtonTriggerGenerator.h"
+#import "ButtonInputReceiver.h"
 #import "Remap.h"
 #import "ModifiedDrag.h"
 #import "DeviceManager.h"
@@ -276,6 +277,27 @@ CGEventRef _Nullable kbModsChanged(CGEventTapProxy proxy, CGEventType type, CGEv
         [_modifiers removeObjectForKey:kMFModificationPreconditionKeyButtons];
     } else {
         _modifiers[kMFModificationPreconditionKeyButtons] = [newModifiers copy]; /// I think we only copy here so the newModifers != oldModifiers assert works
+    }
+    
+    /// Update menu bar modifier indicator and primary button modifier layer
+    if (newModifiers.count > 0) {
+        NSDictionary *lastMod = newModifiers.lastObject;
+        NSNumber *btn = lastMod[kMFButtonModificationPreconditionKeyButtonNumber];
+        NSString *indicator = [NSString stringWithFormat:@"B%@", btn];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [MenuBarItem showModifierIndicator:indicator];
+        });
+        /// Enable interception of primary buttons (1, 2) only if the config toggle is on
+        BOOL layerEnabled = [(id)config(@"General.primaryButtonModifierLayer") boolValue];
+        if (layerEnabled) {
+            [ButtonInputReceiver setPrimaryButtonModifierLayerActive:YES];
+        }
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [MenuBarItem showModifierIndicator:nil];
+        });
+        /// Disable interception — let primary buttons pass through normally
+        [ButtonInputReceiver setPrimaryButtonModifierLayerActive:NO];
     }
     
     if (_btnModPriority == kMFModifierPriorityActiveListen) {
