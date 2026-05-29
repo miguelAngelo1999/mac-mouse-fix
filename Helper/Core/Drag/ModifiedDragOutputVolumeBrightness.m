@@ -9,6 +9,7 @@
 
 #import "ModifiedDragOutputVolumeBrightness.h"
 #import "ScrollOutputUtility.h"
+#import "PointerFreeze.h"
 #import "Constants.h"
 
 @implementation ModifiedDragOutputVolumeBrightness
@@ -24,7 +25,8 @@ static ModifiedDragState *_drag;
 }
 
 + (void)handleBecameInUse {
-    /// Nothing special needed on activation
+    /// Freeze pointer so it doesn't move while adjusting volume/brightness
+    [PointerFreeze freezePointerAtPosition:_drag->usageOrigin];
 }
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
@@ -36,7 +38,7 @@ static ModifiedDragState *_drag;
     BOOL isHorizontal = [_drag->type isEqualToString:kMFModifiedDragTypeVolumeHorizontal]
                      || [_drag->type isEqualToString:kMFModifiedDragTypeBrightnessHorizontal];
     
-    double delta = isHorizontal ? (deltaX / 400.0) : (-deltaY / 400.0);
+    double delta = isHorizontal ? (deltaX / 250.0) : (-deltaY / 250.0);
     
     BOOL isVolume = [_drag->type isEqualToString:kMFModifiedDragTypeVolume]
                  || [_drag->type isEqualToString:kMFModifiedDragTypeVolumeHorizontal];
@@ -50,15 +52,14 @@ static ModifiedDragState *_drag;
 }
 
 + (void)handleDeactivationWhileInUseWithCancel:(BOOL)cancel {
-    /// Nothing to clean up
+    /// Unfreeze pointer
+    [PointerFreeze unfreeze];
 }
 
 + (void)suspend {
-    /// Nothing to suspend
 }
 
 + (void)unsuspend {
-    /// Nothing to unsuspend
 }
 
 @end

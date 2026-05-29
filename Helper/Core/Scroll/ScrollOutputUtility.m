@@ -8,6 +8,7 @@
 
 #import "ScrollOutputUtility.h"
 #import "Constants.h"
+#import "WannabePrefixHeader.h"
 #import <CoreAudio/CoreAudio.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <AppKit/AppKit.h>
@@ -197,6 +198,8 @@ static float _brightnessAccumulator = 0.0f;
     
     CGDirectDisplayID display = [self displayUnderMouse];
     
+    DDLogInfo(@"Brightness: delta=%.4f accum=%.4f display=%u builtIn=%d", delta, _brightnessAccumulator, display, CGDisplayIsBuiltin(display));
+    
     /// Try DisplayServices for ALL displays (works for built-in always, and for
     /// many external displays on macOS 12+ Apple Silicon)
     void *handle = displayServicesHandle();
@@ -206,12 +209,14 @@ static float _brightnessAccumulator = 0.0f;
         if (getFn && setFn) {
             float current = 0.5f;
             int getResult = getFn(display, &current);
+            DDLogInfo(@"Brightness: DisplayServices get=%d current=%.3f", getResult, current);
             if (getResult == 0) {
                 /// DisplayServices works for this display
                 float newVal = fmaxf(0.0f, fminf(1.0f, current + _brightnessAccumulator));
                 setFn(display, newVal);
                 _brightnessAccumulator = 0.0f;
                 showOSD(display, MFOSDImageBrightness, newVal);
+                DDLogInfo(@"Brightness: SET via DisplayServices to %.3f", newVal);
                 return;
             }
         }
