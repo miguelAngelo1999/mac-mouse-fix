@@ -155,17 +155,23 @@
 /* First draft: Learn More */
 "capture-toast.link" = "Learn More";
 
-/* Brightness */
-"drag-effect.brightness" = "Brightness";
+/* Brightness ↕ */
+"drag-effect.brightness" = "Brightness ↕";
 
-/* Brightness (Horizontal) */
-"drag-effect.brightness-horizontal" = "Brightness (Horizontal)";
+/* Brightness ↔ */
+"drag-effect.brightness-horizontal" = "Brightness ↔";
 
-/* Smoothly adjust display brightness by moving your mouse left and right\n \nMove right to increase, move left to decrease */
-"drag-effect.brightness-horizontal.hint" = "Smoothly adjust display brightness by moving your mouse left and right\n \nMove right to increase, move left to decrease";
+/* Adjust display brightness by dragging left and right\n \nRight = brighter, Left = dimmer */
+"drag-effect.brightness-horizontal.hint" = "Adjust display brightness by dragging left and right\n \nRight = brighter, Left = dimmer";
 
-/* Smoothly adjust display brightness by moving your mouse up and down\n \nMove up to increase, move down to decrease */
-"drag-effect.brightness.hint" = "Smoothly adjust display brightness by moving your mouse up and down\n \nMove up to increase, move down to decrease";
+/* Brightness ↕ & Volume ↔ */
+"drag-effect.brightness-volume" = "Brightness ↕ & Volume ↔";
+
+/* Control both with one drag\n \nUp/Down = brightness, Left/Right = volume\nThe dominant axis wins */
+"drag-effect.brightness-volume.hint" = "Control both with one drag\n \nUp/Down = brightness, Left/Right = volume\nThe dominant axis wins";
+
+/* Adjust display brightness by dragging up and down\n \nUp = brighter, Down = dimmer */
+"drag-effect.brightness.hint" = "Adjust display brightness by dragging up and down\n \nUp = brighter, Down = dimmer";
 
 /* First draft: Spaces & Mission Control */
 "drag-effect.dock-swipe" = "Spaces & Mission Control";
@@ -185,17 +191,23 @@
 /* First draft: Scroll freely by moving your mouse in any direction\n \nAlso Navigate between pages in Safari, delete messages in Mail and more by moving your mouse left and right\n \nWorks like swiping with 2 fingers on an Apple Trackpad */
 "drag-effect.scroll-swipe.hint" = "Scroll freely by moving your mouse in any direction\n \nAlso Navigate between pages in Safari, delete messages in Mail and more by moving your mouse left and right\n \nWorks like swiping with 2 fingers on an Apple Trackpad";
 
-/* Volume */
-"drag-effect.volume" = "Volume";
+/* Volume ↕ */
+"drag-effect.volume" = "Volume ↕";
 
-/* Volume (Horizontal) */
-"drag-effect.volume-horizontal" = "Volume (Horizontal)";
+/* Volume ↕ & Brightness ↔ */
+"drag-effect.volume-brightness" = "Volume ↕ & Brightness ↔";
 
-/* Smoothly adjust system volume by moving your mouse left and right\n \nMove right to increase, move left to decrease */
-"drag-effect.volume-horizontal.hint" = "Smoothly adjust system volume by moving your mouse left and right\n \nMove right to increase, move left to decrease";
+/* Control both with one drag\n \nUp/Down = volume, Left/Right = brightness\nThe dominant axis wins */
+"drag-effect.volume-brightness.hint" = "Control both with one drag\n \nUp/Down = volume, Left/Right = brightness\nThe dominant axis wins";
 
-/* Smoothly adjust system volume by moving your mouse up and down\n \nMove up to increase, move down to decrease */
-"drag-effect.volume.hint" = "Smoothly adjust system volume by moving your mouse up and down\n \nMove up to increase, move down to decrease";
+/* Volume ↔ */
+"drag-effect.volume-horizontal" = "Volume ↔";
+
+/* Adjust system volume by dragging left and right\n \nRight = louder, Left = quieter */
+"drag-effect.volume-horizontal.hint" = "Adjust system volume by dragging left and right\n \nRight = louder, Left = quieter";
+
+/* Adjust system volume by dragging up and down\n \nUp = louder, Down = quieter */
+"drag-effect.volume.hint" = "Adjust system volume by dragging up and down\n \nUp = louder, Down = quieter";
 
 /* Move Window */
 "drag-effect.window-move" = "Move Window";

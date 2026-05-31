@@ -151,7 +151,7 @@ def update_strings_files(files, type, repo_root):
         generated_content = ''
         
         if type == 'sourcecode':
-            source_code_files = shared.find_files_with_extensions(['m','c','cp','mm','swift'], ['env/', 'venv/', 'iOS-Polynomial-Regression-master/', './Test/'])
+            source_code_files = shared.find_files_with_extensions(['m','c','cp','mm','swift'], ['env/', 'venv/', 'iOS-Polynomial-Regression-master/', './Test/', 'build-debug/'])
             source_code_files_str = ' '.join(map(lambda p: p.replace(' ', r'\ '), source_code_files))
             shared.runCLT(f"xcrun extractLocStrings {source_code_files_str} -SwiftUI -o ./{temp_folder}", exec='/bin/zsh')
             generated_path = f"{temp_folder}/Localizable.strings"

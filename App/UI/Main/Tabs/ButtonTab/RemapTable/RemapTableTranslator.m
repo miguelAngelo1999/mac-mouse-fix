@@ -154,17 +154,23 @@ static NSArray *getDragEffectsTable() {
 //                  kMFModifiedDragDictKeyFakeDragVariantButtonNumber: @3,
 //        }},
         separatorEffectsTableEntry(),
-        @{@"ui": NSLocalizedString(@"drag-effect.volume", @"Volume"), @"tool": NSLocalizedString(@"drag-effect.volume.hint", @"Smoothly adjust system volume by moving your mouse up and down\n \nMove up to increase, move down to decrease"), @"dict": @{
+        @{@"ui": NSLocalizedString(@"drag-effect.volume", @"Volume ↕"), @"tool": NSLocalizedString(@"drag-effect.volume.hint", @"Adjust system volume by dragging up and down\n \nUp = louder, Down = quieter"), @"dict": @{
                   kMFModifiedDragDictKeyType: kMFModifiedDragTypeVolume,
         }},
-        @{@"ui": NSLocalizedString(@"drag-effect.brightness", @"Brightness"), @"tool": NSLocalizedString(@"drag-effect.brightness.hint", @"Smoothly adjust display brightness by moving your mouse up and down\n \nMove up to increase, move down to decrease"), @"dict": @{
+        @{@"ui": NSLocalizedString(@"drag-effect.brightness", @"Brightness ↕"), @"tool": NSLocalizedString(@"drag-effect.brightness.hint", @"Adjust display brightness by dragging up and down\n \nUp = brighter, Down = dimmer"), @"dict": @{
                   kMFModifiedDragDictKeyType: kMFModifiedDragTypeBrightness,
         }},
-        @{@"ui": NSLocalizedString(@"drag-effect.volume-horizontal", @"Volume (Horizontal)"), @"tool": NSLocalizedString(@"drag-effect.volume-horizontal.hint", @"Smoothly adjust system volume by moving your mouse left and right\n \nMove right to increase, move left to decrease"), @"dict": @{
+        @{@"ui": NSLocalizedString(@"drag-effect.volume-horizontal", @"Volume ↔"), @"tool": NSLocalizedString(@"drag-effect.volume-horizontal.hint", @"Adjust system volume by dragging left and right\n \nRight = louder, Left = quieter"), @"dict": @{
                   kMFModifiedDragDictKeyType: kMFModifiedDragTypeVolumeHorizontal,
         }},
-        @{@"ui": NSLocalizedString(@"drag-effect.brightness-horizontal", @"Brightness (Horizontal)"), @"tool": NSLocalizedString(@"drag-effect.brightness-horizontal.hint", @"Smoothly adjust display brightness by moving your mouse left and right\n \nMove right to increase, move left to decrease"), @"dict": @{
+        @{@"ui": NSLocalizedString(@"drag-effect.brightness-horizontal", @"Brightness ↔"), @"tool": NSLocalizedString(@"drag-effect.brightness-horizontal.hint", @"Adjust display brightness by dragging left and right\n \nRight = brighter, Left = dimmer"), @"dict": @{
                   kMFModifiedDragDictKeyType: kMFModifiedDragTypeBrightnessHorizontal,
+        }},
+        @{@"ui": NSLocalizedString(@"drag-effect.volume-brightness", @"Volume ↕ & Brightness ↔"), @"tool": NSLocalizedString(@"drag-effect.volume-brightness.hint", @"Control both with one drag\n \nUp/Down = volume, Left/Right = brightness\nThe dominant axis wins"), @"dict": @{
+                  kMFModifiedDragDictKeyType: kMFModifiedDragTypeVolumeBrightness,
+        }},
+        @{@"ui": NSLocalizedString(@"drag-effect.brightness-volume", @"Brightness ↕ & Volume ↔"), @"tool": NSLocalizedString(@"drag-effect.brightness-volume.hint", @"Control both with one drag\n \nUp/Down = brightness, Left/Right = volume\nThe dominant axis wins"), @"dict": @{
+                  kMFModifiedDragDictKeyType: kMFModifiedDragTypeBrightnessVolume,
         }},
         separatorEffectsTableEntry(),
         @{@"ui": NSLocalizedString(@"drag-effect.window-move", @"Move Window"), @"tool": NSLocalizedString(@"drag-effect.window-move.hint", @"Move the window under the cursor by dragging your mouse\n \nHold the button and move your mouse to reposition any window"), @"dict": @{

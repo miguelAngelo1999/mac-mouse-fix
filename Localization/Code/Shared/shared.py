@@ -376,7 +376,7 @@ def find_localization_files(repo_root, website_root=None, basetypes=['IB', 'stri
     # Constants
     
     markdown_dir = repo_root + '/' + "Markdown/Templates"
-    exclude_paths_relative = ["Frameworks/Sparkle.framework"]
+    exclude_paths_relative = ["Frameworks/Sparkle.framework", "build-debug"]
     exclude_paths = list(map(lambda exc: repo_root + '/' + exc, exclude_paths_relative))
     
     # Get repos

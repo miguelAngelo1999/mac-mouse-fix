@@ -182,6 +182,10 @@ static ModifiedDragState _drag;
             p = (id<ModifiedDragOutputPlugin>)ModifiedDragOutputVolumeBrightness.class;
         } else if ([type isEqualToString:kMFModifiedDragTypeBrightnessHorizontal]) {
             p = (id<ModifiedDragOutputPlugin>)ModifiedDragOutputVolumeBrightness.class;
+        } else if ([type isEqualToString:kMFModifiedDragTypeVolumeBrightness]) {
+            p = (id<ModifiedDragOutputPlugin>)ModifiedDragOutputVolumeBrightness.class;
+        } else if ([type isEqualToString:kMFModifiedDragTypeBrightnessVolume]) {
+            p = (id<ModifiedDragOutputPlugin>)ModifiedDragOutputVolumeBrightness.class;
         } else if ([type isEqualToString:kMFModifiedDragTypeWindowMove]) {
             p = (id<ModifiedDragOutputPlugin>)ModifiedDragOutputWindowMove.class;
         } else if ([type isEqualToString:kMFModifiedDragTypeRotateZoom]) {

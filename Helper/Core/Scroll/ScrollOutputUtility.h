@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -21,6 +22,8 @@ NS_ASSUME_NONNULL_BEGIN
 + (float)getDisplayBrightness;
 + (void)setDisplayBrightness:(float)brightness;   /// absolute (used by scroll)
 + (void)adjustBrightnessByDelta:(float)delta;     /// relative (used by drag)
++ (void)adjustBrightnessByDelta:(float)delta forDisplayID:(CGDirectDisplayID)displayID; /// relative with explicit display
++ (CGDirectDisplayID)displayUnderMouse;
 
 @end
 

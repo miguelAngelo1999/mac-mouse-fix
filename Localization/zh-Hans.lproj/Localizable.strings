@@ -164,16 +164,22 @@
 /* First draft: Learn More */
 "capture-toast.link" = "了解更多";
 
-/* Brightness */
+/* Brightness ↕ */
 "drag-effect.brightness" = "drag-effect.brightness";
 
-/* Brightness (Horizontal) */
+/* Brightness ↔ */
 "drag-effect.brightness-horizontal" = "drag-effect.brightness-horizontal";
 
-/* Smoothly adjust display brightness by moving your mouse left and right\n \nMove right to increase, move left to decrease */
+/* Adjust display brightness by dragging left and right\n \nRight = brighter, Left = dimmer */
 "drag-effect.brightness-horizontal.hint" = "drag-effect.brightness-horizontal.hint";
 
-/* Smoothly adjust display brightness by moving your mouse up and down\n \nMove up to increase, move down to decrease */
+/* Brightness ↕ & Volume ↔ */
+"drag-effect.brightness-volume" = "drag-effect.brightness-volume";
+
+/* Control both with one drag\n \nUp/Down = brightness, Left/Right = volume\nThe dominant axis wins */
+"drag-effect.brightness-volume.hint" = "drag-effect.brightness-volume.hint";
+
+/* Adjust display brightness by dragging up and down\n \nUp = brighter, Down = dimmer */
 "drag-effect.brightness.hint" = "drag-effect.brightness.hint";
 
 /* First draft: Spaces & Mission Control */
@@ -194,16 +200,22 @@
 /* First draft: Scroll freely by moving your mouse in any direction\n \nAlso Navigate between pages in Safari, delete messages in Mail and more by moving your mouse left and right\n \nWorks like swiping with 2 fingers on an Apple Trackpad */
 "drag-effect.scroll-swipe.hint" = "向任意方向移动您的鼠标来自由滚动n \n也可以左右移动来导航Safari页面、删除“邮件”中的邮件等。\n \n作用相当于在Apple触控板上用双指轻扫";
 
-/* Volume */
+/* Volume ↕ */
 "drag-effect.volume" = "drag-effect.volume";
 
-/* Volume (Horizontal) */
+/* Volume ↕ & Brightness ↔ */
+"drag-effect.volume-brightness" = "drag-effect.volume-brightness";
+
+/* Control both with one drag\n \nUp/Down = volume, Left/Right = brightness\nThe dominant axis wins */
+"drag-effect.volume-brightness.hint" = "drag-effect.volume-brightness.hint";
+
+/* Volume ↔ */
 "drag-effect.volume-horizontal" = "drag-effect.volume-horizontal";
 
-/* Smoothly adjust system volume by moving your mouse left and right\n \nMove right to increase, move left to decrease */
+/* Adjust system volume by dragging left and right\n \nRight = louder, Left = quieter */
 "drag-effect.volume-horizontal.hint" = "drag-effect.volume-horizontal.hint";
 
-/* Smoothly adjust system volume by moving your mouse up and down\n \nMove up to increase, move down to decrease */
+/* Adjust system volume by dragging up and down\n \nUp = louder, Down = quieter */
 "drag-effect.volume.hint" = "drag-effect.volume.hint";
 
 /* Move Window */
