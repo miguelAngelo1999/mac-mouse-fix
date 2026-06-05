@@ -10,17 +10,22 @@
             <description><![CDATA[
                 <h2>Mac Mouse Fix 3.1.1</h2>
                 <ul>
-                    <li>This is a fake test update to verify the updater works</li>
-                    <li>If you see this, the auto-updater is functioning correctly!</li>
+                    <li>Added brightness and volume control via mouse drag</li>
+                    <li>DDC support for external monitors</li>
+                    <li>Custom brightness overlay for external displays</li>
+                    <li>Notification Center gesture support</li>
+                    <li>Logitech CID button support</li>
+                    <li>Check Now button in General tab</li>
+                    <li>Fixed update feed configuration</li>
                 </ul>
             ]]></description>
-            <pubDate>Fri, 06 Jun 2025 10:00:00 +0000</pubDate>
+            <pubDate>Thu, 05 Jun 2025 20:00:00 +0000</pubDate>
             <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
             <enclosure
                 url="https://raw.githubusercontent.com/miguelAngelo1999/mac-mouse-fix/update-feed/Mac%20Mouse%20Fix%203.1.0-beta1.dmg"
                 sparkle:version="25000"
                 sparkle:shortVersionString="3.1.1"
-                sparkle:edSignature="fakesignature"
+                sparkle:edSignature="Gxnu+dwBqR9/JYswFZmaG4dXoTmNUm8OJOl+sEflcYIs6K60CUjZU1s3ua7K4taa8DHDgDb5WuwvAtr24oHLDQ=="
                 length="8233156"
                 type="application/octet-stream"
             />
