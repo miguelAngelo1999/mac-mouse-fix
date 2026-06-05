@@ -22,10 +22,10 @@
             <sparkle:minimumSystemVersion>12.0</sparkle:minimumSystemVersion>
             <enclosure
                 url="https://raw.githubusercontent.com/miguelAngelo1999/mac-mouse-fix/update-feed/Mac%20Mouse%20Fix%203.1.0-beta1.dmg"
-                sparkle:version="24442"
+                sparkle:version="24444"
                 sparkle:shortVersionString="3.1.0-beta1"
-                sparkle:edSignature="ybOBkR3dc9CUBaEJogEPGa3j3hD4H8yaWey04j/nAFExxBAlaBsYfIoPT/vyJThJDkkRMn/W3hQ5qD5npnmxDg=="
-                length="10353849"
+                sparkle:edSignature="Ho8b2PNJIrIjoDeyubg/i0WgyXaYBXbp+9yb+z7eIiS77WVhwxGR5r6MkNTAxIhgpaMpJxfVroJxpJ1yPDkZDA=="
+                length="8233306"
                 type="application/octet-stream"
             />
         </item>
