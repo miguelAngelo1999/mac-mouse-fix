@@ -17,12 +17,6 @@
 /* Zoom in or out by moving your mouse up and down\n \nWorks like pinching with 2 fingers on an Apple Trackpad */
 "drag-effect.zoom.hint" = "drag-effect.zoom.hint";
 
-/* Notification Center */
-"drag-effect.notification-center" = "drag-effect.notification-center";
-
-/* Swipe left to open Notification Center, right to close\n \nWorks like a two-finger swipe from the right edge of a trackpad */
-"drag-effect.notification-center.hint" = "drag-effect.notification-center.hint";
-
 /* First draft: Open 'Security & Privacy' Preferences || Notes: The string for Ventura and later is defined in Interface Builder */
 "accessibility.settings-link.pre-ventura" = "Mở thiết lập 'Security & Privacy'";
 
@@ -178,6 +172,12 @@
 
 /* First draft: Move your mouse:\n - Up to show Mission Control\n - Down to show Application Windows\n - Left or Right to move between Spaces\n \nWorks like swiping with 3 fingers on an Apple Trackpad */
 "drag-effect.dock-swipe.hint" = "Di chuyển chuột:\n - Hướng lên để truy cập Mission Control\n - Hướng xuống để truy cập Application Windows\n - Qua trái hoặc phải để di chuyển giữa các Spaces\n \nHoạt động như vuốt 3 ngón tay trên Apple Trackpad";
+
+/* Notification Center */
+"drag-effect.notification-center" = "drag-effect.notification-center";
+
+/* Drag left to open Notification Center, right to close\n \nWorks like a two-finger swipe from the right edge of a trackpad */
+"drag-effect.notification-center.hint" = "drag-effect.notification-center.hint";
 
 /* Rotate & Zoom */
 "drag-effect.rotate-zoom" = "drag-effect.rotate-zoom";

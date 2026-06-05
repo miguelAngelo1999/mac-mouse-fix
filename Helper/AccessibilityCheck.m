@@ -220,8 +220,9 @@
         ///     - Update: (Oct 2024) right now, we're using `triggeredByUser:NO` here, which makes it so the async tasks (loading the licenseConfig from the internet and talking to the Gumroad API) are performed with `priority: .background`.
         ///         This leads to some delay between when the Helper is started and when it is locked down. If that delay is too long it could make for a weird experience. But right now it only seems to take a fraction of a second.
         
-        [TrialCounter load_Manual];
-        [License checkAndReactWithTriggeredByUser:NO];
+        /// License and trial check disabled for distribution build
+        // [TrialCounter load_Manual];
+        // [License checkAndReactWithTriggeredByUser:NO];
         
         ///
         /// Debug & testing

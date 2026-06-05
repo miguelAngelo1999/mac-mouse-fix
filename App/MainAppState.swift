@@ -31,7 +31,7 @@ import ReactiveSwift
         
         var result = ResizingTabWindowController.window     /// [Jun 6 2025] Could also use `[AppDelegate mainWindow]`. Not sure there's any difference. Should probably unify these accessors.
         if result == nil {
-            assert(false) /// [Jun 6 2025] Not sure this ever fails. If it does fail, I doubt that NSApp.mainWindow will succeed (but not sure)
+            /// Window may not exist yet during early storyboard loading (e.g. RemapTableController.viewDidLoad)
             result = NSApp.mainWindow as? ResizingTabWindow
         }
         return result

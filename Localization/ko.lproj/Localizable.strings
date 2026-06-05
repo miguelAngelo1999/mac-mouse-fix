@@ -17,12 +17,6 @@
 /* Zoom in or out by moving your mouse up and down\n \nWorks like pinching with 2 fingers on an Apple Trackpad */
 "drag-effect.zoom.hint" = "drag-effect.zoom.hint";
 
-/* Notification Center */
-"drag-effect.notification-center" = "drag-effect.notification-center";
-
-/* Swipe left to open Notification Center, right to close\n \nWorks like a two-finger swipe from the right edge of a trackpad */
-"drag-effect.notification-center.hint" = "drag-effect.notification-center.hint";
-
 /* First draft: Open 'Security & Privacy' Preferences || Notes: The string for Ventura and later is defined in Interface Builder */
 "accessibility.settings-link.pre-ventura" = "'보안 및 개인 정보 보호' 설정 열기";
 
@@ -178,6 +172,12 @@
 
 /* First draft: Move your mouse:\n - Up to show Mission Control\n - Down to show Application Windows\n - Left or Right to move between Spaces\n \nWorks like swiping with 3 fingers on an Apple Trackpad */
 "drag-effect.dock-swipe.hint" = "마우스를 움직여 다음 동작을 수행합니다.:\n - 위로 올리면 Mission Control을 엽니다.\n - 아래로 내리면 현재 앱에 대해 열린 모든 윈도우를 보여줍니다.\n - 좌우로 움직이면 생성한 Spaces 사이를 이동합니다.\n \n이는 Apple 트랙패드에서 세 손가락으로 스와이프하는 것과 같습니다.";
+
+/* Notification Center */
+"drag-effect.notification-center" = "drag-effect.notification-center";
+
+/* Drag left to open Notification Center, right to close\n \nWorks like a two-finger swipe from the right edge of a trackpad */
+"drag-effect.notification-center.hint" = "drag-effect.notification-center.hint";
 
 /* Rotate & Zoom */
 "drag-effect.rotate-zoom" = "drag-effect.rotate-zoom";

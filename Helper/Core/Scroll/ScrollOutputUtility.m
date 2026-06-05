@@ -14,6 +14,7 @@
 #import <AppKit/AppKit.h>
 #import <IOKit/IOKitLib.h>
 #import <IOKit/graphics/IOGraphicsTypes.h>
+#import <IOKit/i2c/IOI2CInterface.h>
 #import <dlfcn.h>
 
 // ─── IOAVService DDC (arm64 external displays) ───────────────────────────────
@@ -468,10 +469,13 @@ static void ensureLogicalBrightness(void) {
                 if (getFn) getFn(displayID, &hwBrightness);
             }
         } else {
-            IOAVServiceRef service = [self avServiceForDisplay:displayID];
             int ddcVal = 50;
+            /// Try arm64 IOAVService first, fall back to Intel framebuffer
+            IOAVServiceRef service = [self avServiceForDisplay:displayID];
             if (service) {
                 ddcVal = [self readDDCBrightness:service];
+            } else {
+                ddcVal = [self readDDCBrightnessViaFramebuffer:displayID];
             }
             hwBrightness = ddcVal / 100.0f;
         }
@@ -586,34 +590,33 @@ static void displayReconfigurationCallback(CGDirectDisplayID display, CGDisplayC
 
 + (void)writeDDCValue:(int)ddcValue forDisplay:(CGDirectDisplayID)displayID {
     loadIOAVServiceSymbols();
-    if (!_IOAVServiceWriteI2C || !_IOAVServiceCreateWithService) return;
-    
-    /// Find the IOAVService for this display via EDID-based matching
-    IOAVServiceRef service = [self avServiceForDisplay:displayID];
-    if (!service) {
-        DDLogInfo(@"Brightness DDC: no IOAVService found for display %u", displayID);
-        return;
-    }
     
     ddcValue = MAX(0, MIN(100, ddcValue));
     
-    /// DDC Set VCP Feature (0x03) for VCP code 0x10 (brightness)
-    uint8_t packet[6];
-    packet[0] = 0x84;       // 0x80 | 4 (payload length)
-    packet[1] = 0x03;       // Set VCP Feature opcode
-    packet[2] = 0x10;       // VCP code: brightness
-    packet[3] = (ddcValue >> 8) & 0xFF;
-    packet[4] = ddcValue & 0xFF;
-    packet[5] = 0x6E ^ 0x51 ^ packet[0] ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4];
+    /// Try arm64 IOAVService path first
+    if (_IOAVServiceWriteI2C && _IOAVServiceCreateWithService) {
+        IOAVServiceRef service = [self avServiceForDisplay:displayID];
+        if (service) {
+            uint8_t packet[6];
+            packet[0] = 0x84;
+            packet[1] = 0x03;
+            packet[2] = 0x10;
+            packet[3] = (ddcValue >> 8) & 0xFF;
+            packet[4] = ddcValue & 0xFF;
+            packet[5] = 0x6E ^ 0x51 ^ packet[0] ^ packet[1] ^ packet[2] ^ packet[3] ^ packet[4];
+            
+            NSData *packetData = [NSData dataWithBytes:packet length:sizeof(packet)];
+            CFRetain(service);
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+                _IOAVServiceWriteI2C(service, 0x37, 0x51, (void *)packetData.bytes, (uint32_t)packetData.length);
+                CFRelease(service);
+            });
+            return;
+        }
+    }
     
-    NSData *packetData = [NSData dataWithBytes:packet length:sizeof(packet)];
-    
-    /// Retain service for async block
-    CFRetain(service);
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
-        _IOAVServiceWriteI2C(service, 0x37, 0x51, (void *)packetData.bytes, (uint32_t)packetData.length);
-        CFRelease(service);
-    });
+    /// Fallback: Intel IOFramebuffer I2C path
+    [self writeDDCValueViaFramebuffer:ddcValue forDisplay:displayID];
 }
 
 #pragma mark - DDC Read (VCP Get for brightness seeding)
@@ -658,6 +661,149 @@ static void displayReconfigurationCallback(CGDirectDisplayID display, CGDisplayC
     int currentBrightness = (reply[8] << 8) | reply[9];
     DDLogInfo(@"Brightness DDC read: current=%d", currentBrightness);
     return MAX(0, MIN(100, currentBrightness));
+}
+
+#pragma mark - Intel DDC via IOFramebuffer (x86_64 fallback)
+
+/// Get the IOFramebuffer service port for a given display ID
+static io_service_t framebufferPortForDisplay(CGDirectDisplayID displayID) {
+    if (CGDisplayIsBuiltin(displayID)) return IO_OBJECT_NULL;
+    
+    io_iterator_t iter;
+    if (IOServiceGetMatchingServices(kIOMainPortDefault, IOServiceMatching("IODisplayConnect"), &iter) != KERN_SUCCESS) {
+        return IO_OBJECT_NULL;
+    }
+    
+    io_service_t service;
+    while ((service = IOIteratorNext(iter)) != IO_OBJECT_NULL) {
+        CFDictionaryRef info = IODisplayCreateInfoDictionary(service, kIODisplayOnlyPreferredName);
+        if (info) {
+            CFNumberRef vendorRef = CFDictionaryGetValue(info, CFSTR(kDisplayVendorID));
+            CFNumberRef productRef = CFDictionaryGetValue(info, CFSTR(kDisplayProductID));
+            
+            uint32_t vendor = 0, product = 0;
+            if (vendorRef) CFNumberGetValue(vendorRef, kCFNumberSInt32Type, &vendor);
+            if (productRef) CFNumberGetValue(productRef, kCFNumberSInt32Type, &product);
+            CFRelease(info);
+            
+            /// Match by vendor + product (same as CGDisplay)
+            if (CGDisplayVendorNumber(displayID) == vendor && CGDisplayModelNumber(displayID) == product) {
+                /// Get the framebuffer parent
+                io_service_t framebuffer = IO_OBJECT_NULL;
+                IORegistryEntryGetParentEntry(service, kIOServicePlane, &framebuffer);
+                IOObjectRelease(service);
+                IOObjectRelease(iter);
+                return framebuffer;
+            }
+        }
+        IOObjectRelease(service);
+    }
+    IOObjectRelease(iter);
+    return IO_OBJECT_NULL;
+}
+
+/// Send an I2C request via IOFramebuffer
+static BOOL sendI2CRequest(io_service_t framebuffer, IOI2CRequest *request) {
+    IOItemCount busCount = 0;
+    if (IOFBGetI2CInterfaceCount(framebuffer, &busCount) != KERN_SUCCESS || busCount == 0) {
+        return NO;
+    }
+    
+    for (IOOptionBits bus = 0; bus < busCount; bus++) {
+        io_service_t interface = IO_OBJECT_NULL;
+        if (IOFBCopyI2CInterfaceForBus(framebuffer, bus, &interface) != KERN_SUCCESS) continue;
+        
+        IOI2CConnectRef connect = NULL;
+        if (IOI2CInterfaceOpen(interface, 0, &connect) != KERN_SUCCESS) {
+            IOObjectRelease(interface);
+            continue;
+        }
+        
+        kern_return_t result = IOI2CSendRequest(connect, 0, request);
+        IOI2CInterfaceClose(connect, 0);
+        IOObjectRelease(interface);
+        
+        if (result == KERN_SUCCESS && request->result == kIOReturnSuccess) {
+            return YES;
+        }
+    }
+    return NO;
+}
+
++ (void)writeDDCValueViaFramebuffer:(int)ddcValue forDisplay:(CGDirectDisplayID)displayID {
+    io_service_t framebuffer = framebufferPortForDisplay(displayID);
+    if (framebuffer == IO_OBJECT_NULL) {
+        DDLogInfo(@"Brightness DDC Intel: no framebuffer for display %u", displayID);
+        return;
+    }
+    
+    /// Build DDC Set VCP packet
+    uint8_t data[7];
+    data[0] = 0x51;         // destination address
+    data[1] = 0x84;         // 0x80 | length(4)
+    data[2] = 0x03;         // Set VCP opcode
+    data[3] = 0x10;         // VCP code: brightness
+    data[4] = (ddcValue >> 8) & 0xFF;
+    data[5] = ddcValue & 0xFF;
+    data[6] = 0x6E ^ data[0] ^ data[1] ^ data[2] ^ data[3] ^ data[4] ^ data[5]; // checksum
+    
+    IOI2CRequest request = {};
+    request.commFlags = 0;
+    request.sendAddress = 0x6E;
+    request.sendTransactionType = kIOI2CSimpleTransactionType;
+    request.sendBuffer = (vm_address_t)data;
+    request.sendBytes = sizeof(data);
+    request.replyTransactionType = kIOI2CNoTransactionType;
+    request.replyBytes = 0;
+    
+    usleep(10000);
+    BOOL success = sendI2CRequest(framebuffer, &request);
+    IOObjectRelease(framebuffer);
+    
+    if (!success) {
+        DDLogInfo(@"Brightness DDC Intel: write failed for display %u", displayID);
+    }
+}
+
++ (int)readDDCBrightnessViaFramebuffer:(CGDirectDisplayID)displayID {
+    io_service_t framebuffer = framebufferPortForDisplay(displayID);
+    if (framebuffer == IO_OBJECT_NULL) return 50;
+    
+    /// Build DDC Get VCP request
+    uint8_t sendData[5];
+    sendData[0] = 0x51;     // destination
+    sendData[1] = 0x82;     // 0x80 | length(2)
+    sendData[2] = 0x01;     // Get VCP opcode
+    sendData[3] = 0x10;     // VCP code: brightness
+    sendData[4] = 0x6E ^ sendData[0] ^ sendData[1] ^ sendData[2] ^ sendData[3]; // checksum
+    
+    uint8_t replyData[11] = {0};
+    
+    IOI2CRequest request = {};
+    request.commFlags = 0;
+    request.sendAddress = 0x6E;
+    request.sendTransactionType = kIOI2CSimpleTransactionType;
+    request.sendBuffer = (vm_address_t)sendData;
+    request.sendBytes = sizeof(sendData);
+    request.replyAddress = 0x6F;
+    request.replyTransactionType = kIOI2CDDCciReplyTransactionType;
+    request.replyBuffer = (vm_address_t)replyData;
+    request.replyBytes = sizeof(replyData);
+    request.minReplyDelay = 50 * 1000 * 1000; // 50ms in nanoseconds
+    
+    usleep(10000);
+    BOOL success = sendI2CRequest(framebuffer, &request);
+    IOObjectRelease(framebuffer);
+    
+    if (!success) return 50;
+    
+    /// Validate checksum
+    uint8_t chk = 0x50;
+    for (int i = 0; i < 10; i++) chk ^= replyData[i];
+    if (chk != replyData[10]) return 50;
+    
+    int brightness = (replyData[8] << 8) | replyData[9];
+    return MAX(0, MIN(100, brightness));
 }
 
 #pragma mark - EDID-based IOAVService matching

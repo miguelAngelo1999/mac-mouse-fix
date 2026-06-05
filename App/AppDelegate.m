@@ -350,12 +350,11 @@ static NSDictionary *sideButtonActions;
     
     /// Check for udates
     
-    if (checkForUpdates) {
-        
-        [SparkleUpdaterController enablePrereleaseChannel:checkForPrereleases];
-        
-        [up checkForUpdatesInBackground];
-    }
+    /// Check for updates — disabled for distribution build
+    // if (checkForUpdates) {
+    //     [SparkleUpdaterController enablePrereleaseChannel:checkForPrereleases];
+    //     [up checkForUpdatesInBackground];
+    // }
     
 }
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {

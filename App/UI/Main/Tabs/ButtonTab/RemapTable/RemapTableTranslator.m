@@ -180,6 +180,9 @@ static NSArray *getDragEffectsTable() {
         @{@"ui": NSLocalizedString(@"drag-effect.rotate-zoom", @"Rotate & Zoom"), @"tool": NSLocalizedString(@"drag-effect.rotate-zoom.hint", @"Move left/right to rotate, move up/down to zoom\n \nHold Shift while rotating to snap to 90° steps\n \nWorks in Apple Maps, Photos, Preview and other apps"), @"dict": @{
                   kMFModifiedDragDictKeyType: kMFModifiedDragTypeRotateZoom,
         }},
+        @{@"ui": NSLocalizedString(@"drag-effect.notification-center", @"Notification Center"), @"tool": NSLocalizedString(@"drag-effect.notification-center.hint", @"Drag left to open Notification Center, right to close\n \nWorks like a two-finger swipe from the right edge of a trackpad"), @"dict": @{
+                  kMFModifiedDragDictKeyType: kMFModifiedDragTypeNotificationCenter,
+        }},
     ];
     return dragEffectsTable;
 }
