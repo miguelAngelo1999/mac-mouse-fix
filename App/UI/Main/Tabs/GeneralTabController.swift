@@ -209,7 +209,9 @@ class GeneralTabController: NSViewController {
                                 }
                             }
                         }
-                        else { assert(false) }
+                        else {
+                            DDLogError("GeneralTabController - Unexpected helper enable error: \(error)")
+                        }
                     }
                 })
                 
@@ -278,6 +280,16 @@ class GeneralTabController: NSViewController {
         /// Side effects: Sparkle
         ///     See `applicationDidFinishLaunching` for context
         
+        /// Add "Check Now" button
+        let checkNowButton = NSButton(title: "Check Now", target: nil, action: #selector(SUUpdater.checkForUpdates(_:)))
+        checkNowButton.target = SUUpdater.shared()
+        checkNowButton.bezelStyle = .rounded
+        checkNowButton.controlSize = .small
+        checkNowButton.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        if let stack = updatesExtraSection.subviews.first as? NSStackView {
+            stack.addArrangedSubview(checkNowButton)
+        }
+        
         checkForUpdates.producer.skip(first: 1).startWithValues { doCheckUpdates in
             SparkleUpdaterController.resetSkippedVersions()
             if doCheckUpdates {
@@ -286,7 +298,7 @@ class GeneralTabController: NSViewController {
         }
         getBetaVersions.producer.skip(first: 1).startWithValues { doCheckBetas in
             SparkleUpdaterController.resetSkippedVersions()
-            SparkleUpdaterController.enablePrereleaseChannel(doCheckBetas)
+            /// Note: Not using enablePrereleaseChannel: — we use a single feed for both stable/beta
             if doCheckBetas {
                 SUUpdater.shared().checkForUpdatesInBackground()
             }

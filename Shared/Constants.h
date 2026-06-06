@@ -81,7 +81,7 @@ typedef enum {
 
 #define kMFWebsiteAddress  @"https://noah-nuebling.github.io/mac-mouse-fix-website"
 #define kMFWebsiteRepoAddressRaw @"https://raw.githubusercontent.com/noah-nuebling/mac-mouse-fix-website/gh-pages"
-#define kMFUpdateFeedRepoAddressRaw @"https://raw.githubusercontent.com/noah-nuebling/mac-mouse-fix/update-feed"
+#define kMFUpdateFeedRepoAddressRaw @"https://raw.githubusercontent.com/miguelAngelo1999/mac-mouse-fix/update-feed"
 #define kMFLicenseInfoURLSub @"licenseinfo/config.json"
 
 /// Sparkle
@@ -90,7 +90,7 @@ typedef enum {
 
 /// Public encryption key for signing Sparkle Updates
 ///  Also found in Info.plist
-#define kSUPublicEDKey ZC69ciDfGYN4t3kwRiPc2SC7J4hchv9w+FfVv59r4+U=
+#define kSUPublicEDKey dxGeS3oJ4CDs49+w8RiCk6bPA59i3yJ1e5zJlhsYot4=
 
 /// Sub-URLs that, when appended to kMFWebsiteAddress, will point to an RSS Feed (.xml file) describing Sparkle Updates.
 ///  SUFeedURL is also found in Info.plist. Also see https://sparkle-project.org/documentation/customization/.

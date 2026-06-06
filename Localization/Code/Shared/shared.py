@@ -409,7 +409,7 @@ def find_localization_files(repo_root, website_root=None, basetypes=['IB', 'stri
     #   Note: We do this last because in the analysis we iterate through the `result` dict in insertion order, and analyzing the IB stuff is the slowest. So doing this last makes debugging more convenient.
     if set(['IB', 'strings', 'stringsdict']) & set(basetypes):
         for root, dirs, files in os.walk(repo_root):
-            dirs[:] = [d for d in dirs if root + '/' + d not in exclude_paths]
+            dirs[:] = [d for d in dirs if root + '/' + d not in exclude_paths and 'SourcePackages' not in (root + '/' + d) and 'build-release' not in (root + '/' + d) and 'build-debug' not in (root + '/' + d)]
             is_en_folder = 'en.lproj' in os.path.basename(root)
             is_base_folder = 'Base.lproj' in os.path.basename(root)
             if is_base_folder or is_en_folder:
@@ -418,7 +418,7 @@ def find_localization_files(repo_root, website_root=None, basetypes=['IB', 'stri
                     # Validate
                     _, extension = os.path.splitext(b)
                     assert(is_en_folder or is_base_folder)
-                    if is_en_folder: assert extension in ['.strings', '.stringsdict'], f"en.lproj folder at {b} contained file with extension {extension}"
+                    if is_en_folder: assert extension in ['.strings', '.stringsdict', '.rtf'], f"en.lproj folder at {b} contained file with extension {extension}"
                     if is_base_folder: assert extension in ['.xib', '.storyboard'], f"Base.lproj folder at {b} contained file with extension {extension}"
                     # Get type
                     type = 'strings' if extension == '.strings' else 'stringsdict' if extension == '.stringsdict' else 'IB'

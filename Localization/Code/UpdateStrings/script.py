@@ -56,6 +56,25 @@ temp_folder = './update_comments_temp'
 
 def main():
     
+    # Skip when SourcePackages are present to avoid scanning dependency files.
+    # Xcode sets BUILT_PRODUCTS_DIR during build phases. We use it to locate SourcePackages.
+    built_products = os.environ.get('BUILT_PRODUCTS_DIR', '')
+    if built_products:
+        # BUILT_PRODUCTS_DIR is typically: .../build-xxx/Build/Products/Release
+        # SourcePackages is at:           .../build-xxx/SourcePackages
+        build_root = os.path.dirname(os.path.dirname(os.path.dirname(built_products)))
+        packages_path = os.path.join(build_root, 'SourcePackages')
+        if os.path.exists(packages_path):
+            print(f"Not BartyCrouch: Skipping — SourcePackages found at {packages_path}")
+            return
+    else:
+        # Fallback: scan common derived data dirs relative to cwd
+        cwd = os.getcwd()
+        for d in os.listdir(cwd):
+            if d.startswith('build') and os.path.exists(os.path.join(cwd, d, 'SourcePackages')):
+                print(f"Not BartyCrouch: Skipping — SourcePackages found in {d}/")
+                return
+    
     # Create temp dir
     shared.runCLT(f"mkdir -p {temp_folder}")
     

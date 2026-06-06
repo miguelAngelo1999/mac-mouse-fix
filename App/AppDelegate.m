@@ -350,11 +350,12 @@ static NSDictionary *sideButtonActions;
     
     /// Check for udates
     
-    /// Check for updates — disabled for distribution build
-    // if (checkForUpdates) {
-    //     [SparkleUpdaterController enablePrereleaseChannel:checkForPrereleases];
-    //     [up checkForUpdatesInBackground];
-    // }
+    /// Check for updates
+    if (checkForUpdates) {
+        /// Note: Not using enablePrereleaseChannel: because our custom GDrive feed
+        /// is set via Info.plist SUFeedURL and doesn't have separate stable/beta feeds.
+        [up checkForUpdatesInBackground];
+    }
     
 }
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender {

@@ -34,7 +34,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>24442</string>
+	<string>26202</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>NSHumanReadableCopyright</key>
@@ -48,9 +48,9 @@
 	<key>SUEnableJavaScript</key>
 	<string>YES</string>
 	<key>SUFeedURL</key>
-	<string>https://raw.githubusercontent.com/noah-nuebling/mac-mouse-fix/update-feed/appcast.xml</string>
+	<string>https://drive.usercontent.google.com/download?id=1hUYgYTBg3t-Ev-t9cY6KqX-i2wXcD2AR&amp;export=download&amp;confirm=t</string>
 	<key>SUPublicEDKey</key>
-	<string>ZC69ciDfGYN4t3kwRiPc2SC7J4hchv9w+FfVv59r4+U=</string>
+	<string>dxGeS3oJ4CDs49+w8RiCk6bPA59i3yJ1e5zJlhsYot4=</string>
 	<key>UIDesignRequiresCompatibility</key>
 	<true/>
 </dict>

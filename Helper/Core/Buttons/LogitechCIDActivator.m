@@ -116,8 +116,8 @@ static IOReturn sendAndWait(IOHIDDeviceRef dev, uint8_t *pkt) {
     sGotResp = NO;
     IOReturn r = IOHIDDeviceSetReport(dev, kIOHIDReportTypeOutput, pkt[0], pkt, 20);
     if (r != kIOReturnSuccess) return r;
-    for (int i = 0; i < 50 && !sGotResp; i++)
-        CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.005, false);
+    for (int i = 0; i < 30 && !sGotResp; i++)
+        CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.002, false);
     if (!sGotResp) return kIOReturnTimeout;
     if (sResp[2] == 0xFF) return kIOReturnError;
     return kIOReturnSuccess;
@@ -215,16 +215,18 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     s->isReceiver = NO;
 
     IOHIDDeviceRegisterInputReportCallback(device, s->reportBuf, sizeof(s->reportBuf), inputReportCallback, s);
-    IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+    IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
     sProbingDevIdx = kHIDPP_DevBLE;
     int diverted = activateDevice(device, s);
     if (diverted > 0) {
         NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
         DDLogInfo(@"LogitechCIDActivator: diverted %d CIDs on '%@' [BT]", diverted, name);
+        // Ensure scheduled on main for events
+        IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
         [_states addObject:[NSValue valueWithPointer:s]];
     } else {
-        IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+        IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
         IOHIDDeviceClose(device, kIOHIDOptionsTypeNone);
         free(s);
     }
@@ -237,19 +239,25 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     BOOL isHIDPP = (usagePage.intValue == 0xFF00) || (usagePage.intValue == 0x0001 && usage.intValue == 0x0006);
     if (!isHIDPP) return;
 
-    // Already open?
     if ([_openReceivers containsObject:[NSValue valueWithPointer:device]]) {
-        // Re-probe slots (mouse might have switched back to this receiver)
-        [self probeReceiverSlots:device];
+        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+            [self probeReceiverSlots:device];
+        });
         return;
     }
 
     if (IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone) != kIOReturnSuccess) return;
     [_openReceivers addObject:[NSValue valueWithPointer:device]];
-    [self probeReceiverSlots:device];
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+        [self probeReceiverSlots:device];
+    });
 }
 
 - (void)probeReceiverSlots:(IOHIDDeviceRef)device {
+    // Get current thread's run loop for HID++ response reception during probing
+    CFRunLoopRef probeRL = CFRunLoopGetCurrent();
+    IOHIDDeviceScheduleWithRunLoop(device, probeRL, kCFRunLoopDefaultMode);
+    
     for (uint8_t devIdx = 1; devIdx <= kMaxSlots; devIdx++) {
         // Skip if already have an active state for this device+slot
         BOOL alreadyActive = NO;
@@ -267,18 +275,25 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
         s->isReceiver = YES;
 
         IOHIDDeviceRegisterInputReportCallback(device, s->reportBuf, sizeof(s->reportBuf), inputReportCallback, s);
-        IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
 
+        // Quick ping to check if slot has a device before full probe
         sProbingDevIdx = devIdx;
         int diverted = activateDevice(device, s);
         if (diverted > 0) {
             NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
             DDLogInfo(@"LogitechCIDActivator: diverted %d CIDs via receiver slot %d on '%@'", diverted, devIdx, name);
-            [_states addObject:[NSValue valueWithPointer:s]];
+            // Move to main run loop for event delivery
+            dispatch_async(dispatch_get_main_queue(), ^{
+                IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+                [self->_states addObject:[NSValue valueWithPointer:s]];
+            });
         } else {
             free(s);
         }
     }
+    
+    // Unschedule from probe run loop
+    IOHIDDeviceUnscheduleFromRunLoop(device, probeRL, kCFRunLoopDefaultMode);
 }
 
 - (void)handleDeviceRemoved:(IOHIDDeviceRef)device {
