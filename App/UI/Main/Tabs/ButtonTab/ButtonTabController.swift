@@ -337,37 +337,32 @@ import CocoaLumberjackSwift
         
         /// This func doesn't clearly belong into `ButtonTabController`
         ///     Is called when the helper is enabled
+        ///
+        /// Only loads default remaps if:
+        ///   1. remapsAreInitialized flag is false (first run), AND
+        ///   2. Remaps array is actually empty
+        /// This prevents wiping user config when the flag gets cleared accidentally.
         
-        let hasBeenInited = config("State.remapsAreInitialized") as! Bool? ?? false
+        let remaps = config("Remaps") as? NSArray
+        let hasRemaps = (remaps != nil && remaps!.count > 0)
         
-        if !hasBeenInited {
+        /// Always mark as initialized to prevent future runs from trying to overwrite
+        setConfig("State.remapsAreInitialized", true as NSObject)
+        commitConfig()
+        
+        /// Only load defaults if there are no remaps at all
+        if !hasRemaps {
             
-            setConfig("State.remapsAreInitialized", true as NSObject)
-            commitConfig()
+            let (_, _, bestPresetMatch) = MessagePortUtility.shared.getActiveDeviceInfo() ?? (nil, nil, nil)
+            let defaultMap = config(bestPresetMatch == 3 ? "Constants.defaultRemaps.threeButtons" : "Constants.defaultRemaps.fiveButtons")
             
-            /// Only load defaults if Remaps array is actually empty
-            /// (Prevents nuking user config when remapsAreInitialized gets reset)
-            let currentRemaps = config("Remaps") as? NSArray
-            if currentRemaps == nil || currentRemaps!.count == 0 {
-            
-                let (_, _, bestPresetMatch) = MessagePortUtility.shared.getActiveDeviceInfo() ?? (nil, nil, nil)
-            
-                /// This is copy-pasted from `restoreDefaults()`
-            
-                let currentMap = config("Remaps")
-                let defaultMap = config(bestPresetMatch == 3 ? "Constants.defaultRemaps.threeButtons" : "Constants.defaultRemaps.fiveButtons")
-            
-                if (currentMap != defaultMap) {
+            if let map = defaultMap {
+                setConfig("Remaps", map)
+                commitConfig()
                 
-                    /// Set config
-                    setConfig("Remaps", defaultMap!)
-                    commitConfig()
-                
-                    /// Reload table
-                    DispatchQueue.main.async {
-                        MainAppState.shared.remapTableController?.reloadAll()
-                        MainAppState.shared.buttonTabController?.tableView.updateColumnWidths()
-                    }
+                DispatchQueue.main.async {
+                    MainAppState.shared.remapTableController?.reloadAll()
+                    MainAppState.shared.buttonTabController?.tableView.updateColumnWidths()
                 }
             }
         }
