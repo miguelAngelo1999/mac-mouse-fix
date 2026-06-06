@@ -345,24 +345,29 @@ import CocoaLumberjackSwift
             setConfig("State.remapsAreInitialized", true as NSObject)
             commitConfig()
             
-            let (_, _, bestPresetMatch) = MessagePortUtility.shared.getActiveDeviceInfo() ?? (nil, nil, nil)
+            /// Only load defaults if Remaps array is actually empty
+            /// (Prevents nuking user config when remapsAreInitialized gets reset)
+            let currentRemaps = config("Remaps") as? NSArray
+            if currentRemaps == nil || currentRemaps!.count == 0 {
             
-            /// This is copy-pasted from `restoreDefaults()`
+                let (_, _, bestPresetMatch) = MessagePortUtility.shared.getActiveDeviceInfo() ?? (nil, nil, nil)
             
-            let currentMap = config("Remaps")
-            let defaultMap = config(bestPresetMatch == 3 ? "Constants.defaultRemaps.threeButtons" : "Constants.defaultRemaps.fiveButtons")
+                /// This is copy-pasted from `restoreDefaults()`
             
-            if (currentMap != defaultMap) {
+                let currentMap = config("Remaps")
+                let defaultMap = config(bestPresetMatch == 3 ? "Constants.defaultRemaps.threeButtons" : "Constants.defaultRemaps.fiveButtons")
+            
+                if (currentMap != defaultMap) {
                 
-                /// Set config
-                setConfig("Remaps", defaultMap!)
-                commitConfig()
+                    /// Set config
+                    setConfig("Remaps", defaultMap!)
+                    commitConfig()
                 
-                /// Reload table
-                /// Note: It feels a bit hacky to call `updateColumnWidths()` here. Maybe this should be handled automatically inside the remapTable code.
-                DispatchQueue.main.async {
-                    MainAppState.shared.remapTableController?.reloadAll()
-                    MainAppState.shared.buttonTabController?.tableView.updateColumnWidths()
+                    /// Reload table
+                    DispatchQueue.main.async {
+                        MainAppState.shared.remapTableController?.reloadAll()
+                        MainAppState.shared.buttonTabController?.tableView.updateColumnWidths()
+                    }
                 }
             }
         }
