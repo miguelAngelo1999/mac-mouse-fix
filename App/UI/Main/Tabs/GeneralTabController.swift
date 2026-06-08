@@ -303,6 +303,135 @@ class GeneralTabController: NSViewController {
                 SUUpdater.shared().checkForUpdatesInBackground()
             }
         }
+        
+        // MARK: Profile Manager UI
+        
+        // Divider
+        let profileDivider = NSBox()
+        profileDivider.boxType = .separator
+        profileDivider.translatesAutoresizingMaskIntoConstraints = false
+        
+        // "Profile:" label
+        let profileLabel = NSTextField(labelWithString: "Profile:")
+        profileLabel.font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        profileLabel.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        
+        // Popup button for profile list
+        let profilePopup = NSPopUpButton(frame: .zero, pullsDown: false)
+        profilePopup.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        profilePopup.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        profilePopup.controlSize = .small
+        profilePopup.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        self.profilePopup = profilePopup
+        reloadProfilePopup()
+        
+        // Save button
+        let saveBtn = NSButton(title: "Save…", target: self, action: #selector(saveProfileClicked))
+        saveBtn.bezelStyle = .rounded
+        saveBtn.controlSize = .small
+        saveBtn.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        
+        // Load button
+        let loadBtn = NSButton(title: "Load", target: self, action: #selector(loadProfileClicked))
+        loadBtn.bezelStyle = .rounded
+        loadBtn.controlSize = .small
+        loadBtn.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        self.loadProfileButton = loadBtn
+        
+        // Delete button
+        let deleteBtn = NSButton(title: "Delete", target: self, action: #selector(deleteProfileClicked))
+        deleteBtn.bezelStyle = .rounded
+        deleteBtn.controlSize = .small
+        deleteBtn.font = NSFont.systemFont(ofSize: NSFont.smallSystemFontSize)
+        self.deleteProfileButton = deleteBtn
+        
+        // Horizontal stack: label + popup + save + load + delete
+        let profileRow = NSStackView(views: [profileLabel, profilePopup, saveBtn, loadBtn, deleteBtn])
+        profileRow.orientation = .horizontal
+        profileRow.alignment = .centerY
+        profileRow.spacing = 6
+        profileRow.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Wrapper container
+        let profileSection = NSView()
+        profileSection.translatesAutoresizingMaskIntoConstraints = false
+        profileSection.addSubview(profileDivider)
+        profileSection.addSubview(profileRow)
+        NSLayoutConstraint.activate([
+            profileDivider.leadingAnchor.constraint(equalTo: profileSection.leadingAnchor),
+            profileDivider.trailingAnchor.constraint(equalTo: profileSection.trailingAnchor),
+            profileDivider.topAnchor.constraint(equalTo: profileSection.topAnchor, constant: 6),
+            profileRow.topAnchor.constraint(equalTo: profileDivider.bottomAnchor, constant: 10),
+            profileRow.leadingAnchor.constraint(equalTo: profileSection.leadingAnchor),
+            profileRow.trailingAnchor.constraint(lessThanOrEqualTo: profileSection.trailingAnchor),
+            profileRow.bottomAnchor.constraint(equalTo: profileSection.bottomAnchor, constant: -4),
+        ])
+        
+        masterStack.addArrangedSubview(profileSection)
+        updateProfileButtons()
+    }
+    
+    override func viewDidAppear() {
+        super.viewDidAppear()
+        reloadProfilePopup()
+    }
+    
+    // MARK: Profile outlets
+    
+    private var profilePopup: NSPopUpButton?
+    private var loadProfileButton: NSButton?
+    private var deleteProfileButton: NSButton?
+    
+    private func reloadProfilePopup() {
+        guard let popup = profilePopup else { return }
+        let names = ProfileManager.savedProfileNames()
+        popup.removeAllItems()
+        if names.isEmpty {
+            popup.addItem(withTitle: "(no profiles)")
+        } else {
+            popup.addItems(withTitles: names)
+        }
+        updateProfileButtons()
+    }
+    
+    private func updateProfileButtons() {
+        let hasProfiles = !ProfileManager.savedProfileNames().isEmpty
+        loadProfileButton?.isEnabled = hasProfiles
+        deleteProfileButton?.isEnabled = hasProfiles
+    }
+    
+    @objc private func saveProfileClicked() {
+        guard let window = view.window else { return }
+        ProfileManager.promptSaveProfile(in: window) { [weak self] (name: String?) in
+            guard let name = name else { return }
+            ProfileManager.saveProfile(name: name)
+            self?.reloadProfilePopup()
+            self?.profilePopup?.selectItem(withTitle: name)
+        }
+    }
+    
+    @objc private func loadProfileClicked() {
+        guard let name = profilePopup?.titleOfSelectedItem,
+              name != "(no profiles)" else { return }
+        _ = ProfileManager.loadProfile(name: name)
+    }
+    
+    @objc private func deleteProfileClicked() {
+        guard let name = profilePopup?.titleOfSelectedItem,
+              name != "(no profiles)" else { return }
+        let alert = NSAlert()
+        alert.messageText = "Delete \"\(name)\"?"
+        alert.informativeText = "This profile will be permanently deleted."
+        alert.addButton(withTitle: "Delete")
+        alert.addButton(withTitle: "Cancel")
+        alert.buttons[0].isEnabled = true // destructive styling handled by title
+        guard let window = view.window else { return }
+        alert.beginSheetModal(for: window) { [weak self] response in
+            if response == .alertFirstButtonReturn {
+                ProfileManager.deleteProfile(name: name)
+                self?.reloadProfilePopup()
+            }
+        }
     }
 }
 

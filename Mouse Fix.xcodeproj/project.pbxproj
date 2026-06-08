@@ -264,6 +264,7 @@
 		4FDECCDE28A3E93100DDEE91 /* IsObjC.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDECCDD28A3E93100DDEE91 /* IsObjC.m */; };
 		4FDECCDF28A3E93100DDEE91 /* IsObjC.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDECCDD28A3E93100DDEE91 /* IsObjC.m */; };
 		4FE03A602BFF5F0600708454 /* CoolSUComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE03A5D2BFF5F0500708454 /* CoolSUComparator.m */; };
+		AABB000200000002 /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000200000001 /* ProfileManager.swift */; };
 		4FE03A612BFF5F0600708454 /* CoolSUUpdater.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE03A5F2BFF5F0600708454 /* CoolSUUpdater.m */; };
 		4FE40B96283A49DD00880BEF /* SharedUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE40B95283A49DD00880BEF /* SharedUtilitySwift.swift */; };
 		4FE40B97283A49DD00880BEF /* SharedUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE40B95283A49DD00880BEF /* SharedUtilitySwift.swift */; };
@@ -2315,6 +2316,7 @@
 		4FE03A5C2BFF5F0500708454 /* CoolSUComparator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoolSUComparator.h; sourceTree = "<group>"; };
 		4FE03A5D2BFF5F0500708454 /* CoolSUComparator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoolSUComparator.m; sourceTree = "<group>"; };
 		4FE03A5E2BFF5F0500708454 /* CoolSUUpdater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CoolSUUpdater.h; sourceTree = "<group>"; };
+		AABB000200000001 /* ProfileManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
 		4FE03A5F2BFF5F0600708454 /* CoolSUUpdater.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CoolSUUpdater.m; sourceTree = "<group>"; };
 		4FE40B95283A49DD00880BEF /* SharedUtilitySwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUtilitySwift.swift; sourceTree = "<group>"; };
 		4FE479DF2933C87A00B75E9B /* ButtonModifiers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ButtonModifiers.h; sourceTree = "<group>"; };
@@ -7323,6 +7325,7 @@
 				4FE03A5D2BFF5F0500708454 /* CoolSUComparator.m */,
 				4FE03A5E2BFF5F0500708454 /* CoolSUUpdater.h */,
 				4FE03A5F2BFF5F0600708454 /* CoolSUUpdater.m */,
+				AABB000200000001 /* ProfileManager.swift */,
 			);
 			path = Update;
 			sourceTree = "<group>";
@@ -8103,6 +8106,7 @@
 				4F3E067E26A2F97D000C9E06 /* URLMenuItem.m in Sources */,
 				4FD3250728E2810200256967 /* Device.m in Sources */,
 				4FE03A612BFF5F0600708454 /* CoolSUUpdater.m in Sources */,
+				AABB000200000002 /* ProfileManager.swift in Sources */,
 				4F4C66172E636584005C2612 /* NSBox+Additions.m in Sources */,
 				4FF6660225F2C92700689B77 /* ClickableImageView.m in Sources */,
 				4F7D97A628AEB2EE00C11E79 /* AboutTabController.swift in Sources */,
