@@ -93,10 +93,12 @@ static NSURL *_configURL;
     
     if (self == Locator.class) {
         /// Get appSupportURL & configURL
-        /// Uses the actual bundle identifier (dynamic, not hardcoded author)
+        /// Use the main app's bundle ID for the shared config folder,
+        /// regardless of whether we're running as the main app or helper.
         NSURL *applicationSupportURL = [NSFileManager.defaultManager URLForDirectory:NSApplicationSupportDirectory inDomain:NSUserDomainMask appropriateForURL:NULL create:YES error:nil];
-        NSString *bundleID = NSBundle.mainBundle.bundleIdentifier ?: kMFBundleIDApp;
-        _MFApplicationSupportFolderURL = [applicationSupportURL URLByAppendingPathComponent:bundleID];
+        /// Always use the main app bundle ID (not the helper's) so both share the same config folder.
+        NSString *appBundleID = [Locator mainAppBundle].bundleIdentifier ?: kMFBundleIDApp;
+        _MFApplicationSupportFolderURL = [applicationSupportURL URLByAppendingPathComponent:appBundleID];
         _configURL = [_MFApplicationSupportFolderURL URLByAppendingPathComponent:@"config.plist"];
     }
 }
