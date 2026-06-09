@@ -442,16 +442,19 @@ class TabViewController: NSTabViewController {
         ///     Resizes such that center x stays the same
         
         /// Get the stored size of the tab we're switching to
-        ///     Note: The size of the general tab can change while we're in another tab (if the helper gets disabled), so we're always recalculating its size!
-        var size: NSSize? = tabViewSizes[tabViewItem]
-        if size == nil || (tabViewItem.identifier as? String) == "general" {
-            
-            /// Manually calculate the size of the tab
-            
-            let view = tabViewItem.view
-            view?.needsLayout = true
-            view?.layoutSubtreeIfNeeded() /// Seems like it's not needed sure if needed
-            size = view?.frame.size
+        ///     Always recalculate using fittingSize for reliable intrinsic height.
+        ///     Using frame.size is unreliable — it reflects the current window size, not the tab's natural size.
+        let view = tabViewItem.view
+        view?.needsLayout = true
+        view?.layoutSubtreeIfNeeded()
+        
+        var size: NSSize?
+        if let view = view {
+            let fittingHeight = view.fittingSize.height
+            let width = tabViewSizes[tabViewItem]?.width ?? view.frame.size.width
+            size = NSSize(width: width, height: fittingHeight > 10 ? fittingHeight : view.frame.size.height)
+        } else {
+            size = tabViewSizes[tabViewItem] ?? NSSize(width: 372, height: 200)
         }
         
         /// Setup constraints for resizing
