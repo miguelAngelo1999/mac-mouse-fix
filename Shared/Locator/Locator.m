@@ -93,8 +93,10 @@ static NSURL *_configURL;
     
     if (self == Locator.class) {
         /// Get appSupportURL & configURL
+        /// Uses the actual bundle identifier (dynamic, not hardcoded author)
         NSURL *applicationSupportURL = [NSFileManager.defaultManager URLForDirectory:NSApplicationSupportDirectory inDomain:NSUserDomainMask appropriateForURL:NULL create:YES error:nil];
-        _MFApplicationSupportFolderURL = [applicationSupportURL URLByAppendingPathComponent:kMFBundleIDApp];
+        NSString *bundleID = NSBundle.mainBundle.bundleIdentifier ?: kMFBundleIDApp;
+        _MFApplicationSupportFolderURL = [applicationSupportURL URLByAppendingPathComponent:bundleID];
         _configURL = [_MFApplicationSupportFolderURL URLByAppendingPathComponent:@"config.plist"];
     }
 }
