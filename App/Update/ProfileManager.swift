@@ -51,8 +51,8 @@ private func configSet(_ keyPath: String, _ value: NSObject) {
                 return dir
             }
         }
-        // Fallback: use sanitized bundle ID
-        let fallback = appSupport.appendingPathComponent(candidates[1]).appendingPathComponent("Profiles")
+        // Fallback: use the runtime bundle ID directly
+        let fallback = appSupport.appendingPathComponent(bundleID).appendingPathComponent("Profiles")
         try? FileManager.default.createDirectory(at: fallback, withIntermediateDirectories: true)
         return fallback
     }

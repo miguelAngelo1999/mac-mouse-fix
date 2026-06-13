@@ -93,12 +93,35 @@ static NSURL *_configURL;
     
     if (self == Locator.class) {
         /// Get appSupportURL & configURL
-        /// Use the main app's bundle ID for the shared config folder,
-        /// regardless of whether we're running as the main app or helper.
+        /// Search multiple candidate App Support folders for an existing config.plist.
+        /// This handles bundle ID changes (e.g. com.nuebling.mac-mouse-fix -> com.virgoh.mac-mouse-fix)
+        /// without losing the user's config.
         NSURL *applicationSupportURL = [NSFileManager.defaultManager URLForDirectory:NSApplicationSupportDirectory inDomain:NSUserDomainMask appropriateForURL:NULL create:YES error:nil];
-        /// Always use the main app bundle ID (not the helper's) so both share the same config folder.
-        NSString *appBundleID = [Locator mainAppBundle].bundleIdentifier ?: kMFBundleIDApp;
-        _MFApplicationSupportFolderURL = [applicationSupportURL URLByAppendingPathComponent:appBundleID];
+        
+        NSString *runtimeBundleID = [Locator mainAppBundle].bundleIdentifier ?: kMFBundleIDApp;
+        NSArray<NSString *> *candidates = @[
+            runtimeBundleID,                                                        /// Current bundle ID (com.virgoh.mac-mouse-fix)
+            [runtimeBundleID stringByReplacingOccurrencesOfString:@"-" withString:@""], /// Without dashes (com.virgoh.macmousefix)
+            @"com.nuebling.mac-mouse-fix",                                          /// Legacy bundle ID
+        ];
+        
+        /// Pick whichever folder already has config.plist
+        NSURL *foundURL = nil;
+        for (NSString *folder in candidates) {
+            NSURL *base = [applicationSupportURL URLByAppendingPathComponent:folder];
+            NSURL *configCandidate = [base URLByAppendingPathComponent:@"config.plist"];
+            if ([NSFileManager.defaultManager fileExistsAtPath:configCandidate.path]) {
+                foundURL = base;
+                break;
+            }
+        }
+        
+        /// Fallback: use runtime bundle ID (will create fresh config on first launch)
+        if (!foundURL) {
+            foundURL = [applicationSupportURL URLByAppendingPathComponent:runtimeBundleID];
+        }
+        
+        _MFApplicationSupportFolderURL = foundURL;
         _configURL = [_MFApplicationSupportFolderURL URLByAppendingPathComponent:@"config.plist"];
     }
 }
