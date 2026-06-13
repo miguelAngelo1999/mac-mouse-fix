@@ -12,6 +12,7 @@
 #import "PointerFreeze.h"
 #import "Constants.h"
 #import "WannabePrefixHeader.h"
+#import "DragInertiaEngine.h"
 #import <CoreGraphics/CoreGraphics.h>
 
 @implementation ModifiedDragOutputVolumeBrightness
@@ -20,6 +21,7 @@
 
 static ModifiedDragState *_drag;
 static CGDirectDisplayID _targetDisplayID; /// Captured at drag start for brightness
+static DragInertiaEngine *_inertia;        /// Fling + precision engine
 
 /// Combined mode axis-lock state
 static BOOL _combinedAxisLocked;       /// Whether we've committed to an axis
@@ -35,6 +37,8 @@ static const double kAxisSwitchRatio = 3.0;        /// Other axis must be Nx dom
 
 + (void)initializeWithDragState:(ModifiedDragState *)dragStateRef {
     _drag = dragStateRef;
+    if (!_inertia) _inertia = [[DragInertiaEngine alloc] init];
+    [_inertia cancel];
 }
 
 + (void)handleBecameInUse {
@@ -59,7 +63,16 @@ static const double kAxisSwitchRatio = 3.0;        /// Other axis must be Nx dom
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
     
-    /// Scale: ~400px of mouse movement = full range (0.0 to 1.0)
+    /// Apply precision scaling
+    double scaledDx, scaledDy;
+    [_inertia trackDeltaX:deltaX deltaY:deltaY outDeltaX:&scaledDx outDeltaY:&scaledDy];
+    
+    [self applyDeltaX:scaledDx deltaY:scaledDy];
+}
+
++ (void)applyDeltaX:(double)deltaX deltaY:(double)deltaY {
+    
+    /// Scale: ~250px of mouse movement = full range (0.0 to 1.0)
     /// Vertical: up (negative deltaY) = increase, down = decrease
     /// Horizontal: right (positive deltaX) = increase, left = decrease
     
@@ -157,6 +170,16 @@ static const double kAxisSwitchRatio = 3.0;        /// Other axis must be Nx dom
 + (void)handleDeactivationWhileInUseWithCancel:(BOOL)cancel {
     /// Unfreeze pointer
     [PointerFreeze unfreeze];
+    
+    if (cancel) {
+        [_inertia cancel];
+    } else {
+        /// Start fling — slow velocity scale so the fling feels weighty on the small volume slider
+        __weak id weakSelf = self;
+        [_inertia startFlingWithVelocityScale:0.12 callback:^(double dx, double dy) {
+            [weakSelf applyDeltaX:dx deltaY:dy];
+        }];
+    }
 }
 
 + (void)suspend {

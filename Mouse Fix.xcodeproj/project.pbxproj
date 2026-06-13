@@ -265,6 +265,8 @@
 		4FDECCDF28A3E93100DDEE91 /* IsObjC.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FDECCDD28A3E93100DDEE91 /* IsObjC.m */; };
 		4FE03A602BFF5F0600708454 /* CoolSUComparator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE03A5D2BFF5F0500708454 /* CoolSUComparator.m */; };
 		AABB000200000002 /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000200000001 /* ProfileManager.swift */; };
+		CCDD000100000003 /* DragInertiaEngine.h in Sources */ = {isa = PBXBuildFile; fileRef = CCDD000100000001 /* DragInertiaEngine.h */; };
+		CCDD000100000004 /* DragInertiaEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = CCDD000100000002 /* DragInertiaEngine.m */; };
 		4FE03A612BFF5F0600708454 /* CoolSUUpdater.m in Sources */ = {isa = PBXBuildFile; fileRef = 4FE03A5F2BFF5F0600708454 /* CoolSUUpdater.m */; };
 		4FE40B96283A49DD00880BEF /* SharedUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE40B95283A49DD00880BEF /* SharedUtilitySwift.swift */; };
 		4FE40B97283A49DD00880BEF /* SharedUtilitySwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FE40B95283A49DD00880BEF /* SharedUtilitySwift.swift */; };
@@ -2344,6 +2346,8 @@
 		CC000001000000000000CC01 /* ModifiedDragOutputWindowMove.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModifiedDragOutputWindowMove.h; sourceTree = "<group>"; };
 		CC000001000000000000CC02 /* ModifiedDragOutputWindowMove.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModifiedDragOutputWindowMove.m; sourceTree = "<group>"; };
 		DD000001000000000000DD01 /* ModifiedDragOutputRotateZoom.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModifiedDragOutputRotateZoom.h; sourceTree = "<group>"; };
+		CCDD000100000001 /* DragInertiaEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DragInertiaEngine.h; sourceTree = "<group>"; };
+		CCDD000100000002 /* DragInertiaEngine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DragInertiaEngine.m; sourceTree = "<group>"; };
 		DD000001000000000000DD02 /* ModifiedDragOutputRotateZoom.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModifiedDragOutputRotateZoom.m; sourceTree = "<group>"; };
 		NC000001000000000000NC01 /* ModifiedDragOutputNotificationCenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ModifiedDragOutputNotificationCenter.h; sourceTree = "<group>"; };
 		NC000001000000000000NC02 /* ModifiedDragOutputNotificationCenter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ModifiedDragOutputNotificationCenter.m; sourceTree = "<group>"; };
@@ -7539,6 +7543,8 @@
 					CC000001000000000000CC02 /* ModifiedDragOutputWindowMove.m */,
 					DD000001000000000000DD01 /* ModifiedDragOutputRotateZoom.h */,
 					DD000001000000000000DD02 /* ModifiedDragOutputRotateZoom.m */,
+				CCDD000100000001 /* DragInertiaEngine.h */,
+				CCDD000100000002 /* DragInertiaEngine.m */,
 					NC000001000000000000NC01 /* ModifiedDragOutputNotificationCenter.h */,
 					NC000001000000000000NC02 /* ModifiedDragOutputNotificationCenter.m */,
 				4FCB260D293147CD0066EE56 /* ModifiedDrag.swift */,
@@ -8226,6 +8232,7 @@
 				4FF0255727B0091700923107 /* ModifiedDragOutputAddMode.m in Sources */,
 					CC000001000000000000CC03 /* ModifiedDragOutputWindowMove.m in Sources */,
 					DD000001000000000000DD03 /* ModifiedDragOutputRotateZoom.m in Sources */,
+				CCDD000100000004 /* DragInertiaEngine.m in Sources */,
 				NC000001000000000000NC03 /* ModifiedDragOutputNotificationCenter.m in Sources */,
 				4FF0255127B0033000923107 /* ModifiedDragOutputTwoFingerSwipe.m in Sources */,
 				4FC8A7CE28AAF1BC007DB982 /* MarkdownParser.swift in Sources */,

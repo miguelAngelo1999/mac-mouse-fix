@@ -11,6 +11,7 @@
 #import "Constants.h"
 #import "IOHIDEventTypes.h"
 #import "PointerFreeze.h"
+#import "DragInertiaEngine.h"
 #import "Mac_Mouse_Fix_Helper-Swift.h"
 #import <CoreGraphics/CoreGraphics.h>
 
@@ -23,6 +24,7 @@ static BOOL _rotateStarted;
 static BOOL _zoomStarted;
 static double _rotationAccumulator; /// Accumulated rotation for snap mode
 static double _gestureRotationAccumulator; /// Tracks rotation within current gesture to restart at 80°
+static DragInertiaEngine *_rzInertia; /// Fling + precision engine
 
 #pragma mark - Interface
 
@@ -31,6 +33,8 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
     _rotateStarted = NO;
     _zoomStarted = NO;
     _rotationAccumulator = 0.0;
+    if (!_rzInertia) _rzInertia = [[DragInertiaEngine alloc] init];
+    [_rzInertia cancel];
 }
 
 + (void)handleBecameInUse {
@@ -46,8 +50,17 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
     
+    /// Apply precision scaling
+    double scaledDx, scaledDy;
+    [_rzInertia trackDeltaX:deltaX deltaY:deltaY outDeltaX:&scaledDx outDeltaY:&scaledDy];
+    
+    [self applyDeltaX:scaledDx deltaY:scaledDy event:event];
+}
+
++ (void)applyDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef _Nullable)event {
+    
     /// Check if Shift is held (for 90° snap mode)
-    CGEventFlags flags = CGEventGetFlags(event);
+    CGEventFlags flags = event ? CGEventGetFlags(event) : 0;
     BOOL shiftHeld = (flags & kCGEventFlagMaskShift) != 0;
     
     /// Axis selection with hysteresis — once an axis is active, require 2x the other
@@ -120,6 +133,16 @@ static double _gestureRotationAccumulator; /// Tracks rotation within current ge
     /// Unfreeze pointer
     [PointerFreeze unfreeze];
     _gestureRotationAccumulator = 0.0;
+    
+    if (cancel) {
+        [_rzInertia cancel];
+    } else {
+        /// Fling — full velocity for rotate/zoom (natural scroll-like feel)
+        __weak id weakSelf = self;
+        [_rzInertia startFlingWithVelocityScale:1.0 callback:^(double dx, double dy) {
+            [weakSelf applyDeltaX:dx deltaY:dy event:nil];
+        }];
+    }
 }
 
 + (void)suspend {
