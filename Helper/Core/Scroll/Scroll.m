@@ -385,12 +385,17 @@ static void heavyProcessing(CGEventRef event, int64_t scrollDeltaAxis1, int64_t 
         
     } /// End `if (firstConsecutive) {`
     
-    /// Suppress scroll effect modifications while a modified drag is actively in use
-    /// This prevents e.g. volume/brightness scroll effects from firing when the user
-    /// is actively dragging with RotateZoom on the same button (Logitech mice can send
-    /// spurious horizontal scroll events during fast horizontal mouse movement).
-    if (_modifications.effectMod != kMFScrollEffectModificationNone
-        && [ModifiedDrag isInUse]) {
+    /// Suppress scroll while a modified drag is active (button held down).
+    ///
+    /// Heuristics:
+    /// - If drag is InUse (crossed movement threshold): always suppress — user is definitely dragging.
+    /// - If drag is Initialized (button held, not yet moved enough): also suppress — user is likely
+    ///   intending to drag and the scroll is accidental (e.g. middle button pressed to start a
+    ///   Scroll & Navigate drag, scroll wheel fires immediately from the physical click mechanism).
+    ///
+    /// This prevents the classic middle-button problem where pressing the button triggers both a
+    /// scroll event (from the physical click) and the drag mode simultaneously.
+    if ([ModifiedDrag isActive]) {
         CFRelease(event);
         return;
     }

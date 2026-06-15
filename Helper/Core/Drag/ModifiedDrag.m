@@ -432,6 +432,14 @@ void handleMouseInputWhileInUse(int64_t deltaX, int64_t deltaY, CGEventRef event
     return _drag.activationState == kMFModifiedInputActivationStateInUse;
 }
 
++ (BOOL)isActive {
+    /// True when the drag button is held down (Initialized or InUse).
+    /// Used to suppress scroll while the user may be intending to drag —
+    /// even before the movement threshold has been crossed.
+    return _drag.activationState == kMFModifiedInputActivationStateInitialized
+        || _drag.activationState == kMFModifiedInputActivationStateInUse;
+}
+
 + (void)deactivateWithCancel:(BOOL)cancel {
     
     dispatch_async(_drag.queue, ^{

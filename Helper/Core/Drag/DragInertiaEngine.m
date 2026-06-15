@@ -20,7 +20,7 @@ static const double kMouseMovingMaxInterval = 0.08;
 
 /// Precision scaling
 static const double kPrecisionThreshold = 2.5;
-static const double kPrecisionFactor    = 0.20;
+static const double kPrecisionFactor    = 0.08;  /// floor for very slow movements (was 0.20)
 
 /// Fling physics (same values as scroll momentum)
 static const double kFlingDragCoefficient = 30.0;
@@ -28,11 +28,23 @@ static const double kFlingDragExponent    = 0.7;
 static const double kFlingStopSpeed       = 1.5;
 static const double kFlingMinExitSpeed    = 4.0;
 
+/// Flywheel physics
+static const double kFlywheelAcceleration = 0.025;  /// base mouse delta → velocity force
+static const double kFlywheelDrag         = 0.96;   /// per-frame velocity decay
+static const double kFlywheelMinSpeed     = 0.0003; /// stop threshold
+static const double kFlywheelFrameRate    = 120.0;  /// Hz
+
 @implementation DragInertiaEngine {
     double _vx;
     double _vy;
     CFTimeInterval _lastEventTime;
     TouchAnimator *_animator;
+    
+    /// Flywheel state
+    double _fwVx;           /// flywheel velocity x
+    double _fwVy;           /// flywheel velocity y
+    dispatch_source_t _fwTimer;
+    DragInertiaCallback _fwCallback;
 }
 
 // MARK: - Init
@@ -43,6 +55,9 @@ static const double kFlingMinExitSpeed    = 4.0;
         _vx = 0; _vy = 0;
         _lastEventTime = 0;
         _animator = [[TouchAnimator alloc] init];
+        _fwVx = 0; _fwVy = 0;
+        _fwTimer = nil;
+        _fwCallback = nil;
     }
     return self;
 }
@@ -76,6 +91,75 @@ static const double kFlingMinExitSpeed    = 4.0;
     
     *outDx = dx * scale;
     *outDy = dy * scale;
+}
+
+// MARK: - Flywheel
+
+- (void)startFlywheelWithCallback:(DragInertiaCallback)callback {
+    [self stopFlywheelTimer];
+    _fwVx = 0; _fwVy = 0;
+    _fwCallback = callback;
+    
+    dispatch_queue_t queue = dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0);
+    _fwTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, queue);
+    
+    uint64_t interval = (uint64_t)(NSEC_PER_SEC / kFlywheelFrameRate);
+    dispatch_source_set_timer(_fwTimer, dispatch_time(DISPATCH_TIME_NOW, interval), interval, interval / 10);
+    
+    __weak typeof(self) weakSelf = self;
+    dispatch_source_set_event_handler(_fwTimer, ^{
+        typeof(self) s = weakSelf;
+        if (!s) return;
+        
+        /// Apply drag decay
+        s->_fwVx *= kFlywheelDrag;
+        s->_fwVy *= kFlywheelDrag;
+        
+        double speed = sqrt(s->_fwVx * s->_fwVx + s->_fwVy * s->_fwVy);
+        if (speed < kFlywheelMinSpeed) {
+            s->_fwVx = 0; s->_fwVy = 0;
+            /// Keep timer running — flywheel is just coasting at zero, waiting for more input
+            return;
+        }
+        
+        double dx = s->_fwVx;
+        double dy = s->_fwVy;
+        DragInertiaCallback cb = s->_fwCallback;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (cb) cb(dx, dy);
+        });
+    });
+    
+    dispatch_resume(_fwTimer);
+}
+
+- (void)pedalDeltaX:(double)dx deltaY:(double)dy {
+    /// Add force to flywheel velocity with non-linear (power curve) acceleration.
+    ///
+    /// The precision scaling in trackDeltaX already compresses slow movements.
+    /// On top of that, the accel multiplier further stretches the response curve:
+    ///   - Very slow (speed ≈ 0):  ~0.08x precision + ~1.0x accel = ultra-fine control
+    ///   - Medium (speed ≈ 8):     ~1.0x precision + ~2.0x accel = normal feel
+    ///   - Fast fling (speed ≥ 24): ~1.0x precision + ~4.0x accel = full-range sweep
+    ///
+    /// This lets the user go from mute→full or full→mute with a single hard fling.
+    double scaledDx, scaledDy;
+    [self trackDeltaX:dx deltaY:dy outDeltaX:&scaledDx outDeltaY:&scaledDy];
+    
+    double speed = sqrt(scaledDx*scaledDx + scaledDy*scaledDy);
+    double accelMultiplier = 1.0 + fmin(speed / 8.0, 3.0); /// 1x–4x, saturates at speed=24
+    double accel = kFlywheelAcceleration * accelMultiplier;
+    
+    _fwVx += scaledDx * accel;
+    _fwVy += scaledDy * accel;
+}
+
+- (void)stopFlywheelTimer {
+    if (_fwTimer) {
+        dispatch_source_cancel(_fwTimer);
+        _fwTimer = nil;
+    }
 }
 
 // MARK: - Fling (scroll-momentum physics)
@@ -148,8 +232,10 @@ static const double kFlingMinExitSpeed    = 4.0;
 
 - (void)cancel {
     [_animator cancel_forAutoMomentumScroll:YES];
+    [self stopFlywheelTimer];
     _vx = 0; _vy = 0;
     _lastEventTime = 0;
+    _fwVx = 0; _fwVy = 0;
 }
 
 @end

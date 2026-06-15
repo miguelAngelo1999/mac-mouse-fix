@@ -50,7 +50,9 @@ static DragInertiaEngine *_rzInertia; /// Fling + precision engine
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
     
-    /// Apply precision scaling
+    /// Apply precision scaling only — no non-linear acceleration.
+    /// Rotate/zoom sends continuous gesture deltas directly to apps which render
+    /// frame-by-frame; non-linear multipliers cause visible jerkiness.
     double scaledDx, scaledDy;
     [_rzInertia trackDeltaX:deltaX deltaY:deltaY outDeltaX:&scaledDx outDeltaY:&scaledDy];
     

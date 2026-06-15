@@ -12,6 +12,7 @@
 #import "PointerFreeze.h"
 #import "WannabePrefixHeader.h"
 #import "MFHIDEventImports.h"
+#import "DragInertiaEngine.h"
 #import <AppKit/AppKit.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <IOKit/hidsystem/IOHIDEventSystemClient.h>
@@ -85,18 +86,29 @@ static double _originOffset;
 static double _lastDelta;
 static double _velocityBuffer[5]; /// Last 5 deltas for velocity averaging
 static int _velocityIndex;
+static DragInertiaEngine *_ncInertia; /// Fling engine for momentum after release
+static BOOL _ncIsOpen; /// Tracks whether NC was left open after last gesture
+static NSInteger _ncGeneration; /// Incremented on each new drag to cancel stale dispatch_after callbacks
 
 + (void)initializeWithDragState:(ModifiedDragState *)dragStateRef {
     _drag = dragStateRef;
     loadHIDSymbols();
+    if (!_ncInertia) _ncInertia = [[DragInertiaEngine alloc] init];
+    [_ncInertia cancel];
+    _ncGeneration++; /// Invalidate any pending dispatch_after from previous session
 }
 
 + (void)handleBecameInUse {
     _gestureStarted = NO;
-    _originOffset = 0.0;
     _lastDelta = 0.0;
     _velocityIndex = 0;
     memset(_velocityBuffer, 0, sizeof(_velocityBuffer));
+    /// Note: _originOffset is intentionally NOT reset here — it persists from the
+    /// previous gesture so the panel starts exactly where it was left.
+    
+    /// Debug log
+    FILE *f = fopen("/Users/virgoh/Library/Application Support/com.virgoh.mac-mouse-fix/nc_drag.log", "a");
+    if (f) { fprintf(f, "=== handleBecameInUse offset=%.3f ncIsOpen=%d ===\n", _originOffset, _ncIsOpen); fclose(f); }
     
     /// Warp cursor to right edge — NC gesture requires edge position
     CGEventRef locEvent = CGEventCreate(NULL);
@@ -121,55 +133,118 @@ static int _velocityIndex;
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
     
     CGSize screenSize = NSScreen.mainScreen.frame.size;
-    double scale = 1.8 / screenSize.width;
-    double delta = deltaX * scale;
+    double baseScale = 1.8 / screenSize.width;
     
     /// Skip initialization artifacts
     if (fabs(deltaX) > 80) return;
     
+    /// Non-linear input curve — same principle as VolumeBrightness:
+    /// slow = precise fine control, fast = covers full range quickly.
+    /// Toned down vs VolumeBrightness since NC offset range (0-2) is sensitive.
+    double absX = fabs(deltaX);
+    double accelMultiplier = 1.0 + fmin(absX / 20.0, 1.5); /// 1x–2.5x (gentler than vol/bright)
+    /// Precision floor for very slow movements
+    double precisionScale = 1.0;
+    if (absX < 3.0) {
+        precisionScale = 0.2 + (absX / 3.0) * 0.8; /// 0.2 at 0px → 1.0 at 3px
+    }
+    double delta = deltaX * baseScale * precisionScale * accelMultiplier;
+    
     if (!_gestureStarted) {
-        /// Start at high offset (NC "already fully out"), then user drags to control
         _gestureStarted = YES;
-        _originOffset = 1.5;
+        
+        /// First event: use base scale only (no non-linear boost) to avoid jump on start
+        double firstDelta = deltaX * baseScale;
+        _originOffset += firstDelta;
+        _originOffset = fmax(0.0, fmin(2.0, _originOffset));
+        
+        /// Track velocity even on first event (important for fling detection)
+        double unused1, unused2;
+        [_ncInertia trackDeltaX:deltaX deltaY:0 outDeltaX:&unused1 outDeltaY:&unused2];
+        
         [self postNCSwipeWithOffset:_originOffset phase:kIOHIDEventPhaseBegan];
-        _originOffset = 1.4;
-        [self postNCSwipeWithOffset:_originOffset phase:kIOHIDEventPhaseChanged];
         return;
     }
     
     _originOffset += delta;
-    _originOffset = fmax(0.0, fmin(2.0, _originOffset));
+    _originOffset = fmax(-0.3, fmin(2.3, _originOffset)); /// Allow slight overscroll for rubberband
     _lastDelta = delta;
     _velocityBuffer[_velocityIndex % 5] = delta;
     _velocityIndex++;
+    
+    {
+        FILE *f = fopen("/Users/virgoh/Library/Application Support/com.virgoh.mac-mouse-fix/nc_drag.log", "a");
+        if (f) { fprintf(f, "input: deltaX=%.1f delta=%.4f offset=%.3f\n", deltaX, delta, _originOffset); fclose(f); }
+    }
+    
+    /// Track velocity for fling
+    double unused1, unused2;
+    [_ncInertia trackDeltaX:deltaX deltaY:0 outDeltaX:&unused1 outDeltaY:&unused2];
     
     [self postNCSwipeWithOffset:_originOffset phase:kIOHIDEventPhaseChanged];
 }
 
 + (void)handleDeactivationWhileInUseWithCancel:(BOOL)cancel {
     
-    if (_gestureStarted) {
-        /// Calculate average velocity from last 5 frames
-        double avgVelocity = 0;
-        int count = MIN(_velocityIndex, 5);
-        for (int i = 0; i < count; i++) avgVelocity += _velocityBuffer[i];
-        if (count > 0) avgVelocity /= count;
-        
-        /// Use velocity direction for snap decision (fling support)
-        IOHIDEventPhaseBits phase;
-        if (fabs(avgVelocity) > 0.002) {
-            /// Fling detected — use direction
-            phase = (avgVelocity > 0) ? kIOHIDEventPhaseEnded : kIOHIDEventPhaseCancelled;
-        } else {
-            /// No fling — use position
-            phase = (_originOffset >= 0.5) ? kIOHIDEventPhaseEnded : kIOHIDEventPhaseCancelled;
-        }
-        
-        /// Boost exit speed for stronger fling effect
-        _lastDelta = avgVelocity * 8.0;
-        
-        [self postNCSwipeWithOffset:_originOffset phase:phase];
+    if (!_gestureStarted) {
+        CGDisplayShowCursor(kCGNullDirectDisplay);
+        [PointerFreeze unfreeze];
+        return;
     }
+    
+    if (cancel) {
+        [_ncInertia cancel];
+        _ncIsOpen = NO;
+        [self postNCSwipeWithOffset:_originOffset phase:kIOHIDEventPhaseCancelled];
+        _originOffset = 0.0; /// OS will spring to closed
+        CGDisplayShowCursor(kCGNullDirectDisplay);
+        [PointerFreeze unfreeze];
+        return;
+    }
+    
+    /// Both open and close: send the final event immediately and let the OS animate.
+    /// Animating the offset ourselves breaks the continuous gesture stream,
+    /// causing the OS to reset position to 0 on the next Began.
+    
+    BOOL isClosingFling = (_lastDelta < -0.008);  /// deliberate leftward fling
+    BOOL isOpeningFling = (_lastDelta > 0.008);   /// deliberate rightward fling
+    
+    /// Guard: don't close if already closed, don't "open-fling" if already open
+    if (isClosingFling && _originOffset <= 0.05) isClosingFling = NO;
+    if (isOpeningFling && _originOffset >= 0.55) isOpeningFling = NO;
+    
+    IOHIDEventPhaseBits finalPhase;
+    if (isClosingFling) {
+        finalPhase = kIOHIDEventPhaseCancelled;
+        _ncIsOpen = NO;
+    } else if (isOpeningFling) {
+        finalPhase = kIOHIDEventPhaseEnded;
+        _ncIsOpen = YES;
+    } else {
+        /// Slow release — decide by position (NC fully open around offset 0.5+)
+        finalPhase = (_originOffset >= 0.5) ? kIOHIDEventPhaseEnded : kIOHIDEventPhaseCancelled;
+        _ncIsOpen = (finalPhase == kIOHIDEventPhaseEnded);
+    }
+    
+    /// Clamp offset back to valid range before sending final event
+    _originOffset = fmax(0.0, fmin(2.0, _originOffset));
+    
+    {
+        FILE *f = fopen("/Users/virgoh/Library/Application Support/com.virgoh.mac-mouse-fix/nc_drag.log", "a");
+        if (f) { fprintf(f, "RELEASE: offset=%.3f lastDelta=%.4f isClosing=%d isOpening=%d phase=%s ncIsOpen=%d\n---\n",
+            _originOffset, _lastDelta, isClosingFling, isOpeningFling,
+            (finalPhase == kIOHIDEventPhaseEnded ? "Ended" : "Cancelled"), _ncIsOpen); fclose(f); }
+    }
+    
+    /// Boost exit speed so the OS animates decisively to open or closed
+    double savedLastDelta = _lastDelta;
+    _lastDelta = savedLastDelta * 12.0;
+    [self postNCSwipeWithOffset:_originOffset phase:finalPhase];
+    _lastDelta = savedLastDelta;
+    
+    /// Reset offset to match where the OS will actually settle after its animation.
+    /// This prevents the next Began from snapping to a stale position.
+    _originOffset = _ncIsOpen ? 1.4 : 0.0;
     
     CGDisplayShowCursor(kCGNullDirectDisplay);
     [PointerFreeze unfreeze];

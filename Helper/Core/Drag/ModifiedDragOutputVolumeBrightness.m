@@ -42,7 +42,7 @@ static const double kAxisSwitchRatio = 3.0;        /// Other axis must be Nx dom
 }
 
 + (void)handleBecameInUse {
-    /// Determine target display from the drag origin point (most reliable — before any pointer manipulation)
+    /// Determine target display from the drag origin point
     CGPoint origin = _drag->usageOrigin;
     uint32_t count = 0;
     CGDirectDisplayID displayID = kCGNullDirectDisplay;
@@ -51,23 +51,23 @@ static const double kAxisSwitchRatio = 3.0;        /// Other axis must be Nx dom
     
     DDLogInfo(@"VolBright: drag started on display %u at (%.0f, %.0f)", _targetDisplayID, origin.x, origin.y);
     
-    /// Freeze pointer so it doesn't move while adjusting volume/brightness
     [PointerFreeze freezePointerAtPosition:_drag->usageOrigin];
-    /// Reset axis lock state for combined modes
     _combinedAxisLocked = NO;
     _combinedIsVertical = NO;
     _combinedAccumX = 0.0;
     _combinedAccumY = 0.0;
     _combinedLastActiveTime = CFAbsoluteTimeGetCurrent();
+    
+    /// Start flywheel — continuous timer that applies velocity to value
+    __weak id weakSelf = self;
+    [_inertia startFlywheelWithCallback:^(double dx, double dy) {
+        [weakSelf applyDeltaX:dx deltaY:dy];
+    }];
 }
 
 + (void)handleMouseInputWhileInUseWithDeltaX:(double)deltaX deltaY:(double)deltaY event:(CGEventRef)event {
-    
-    /// Apply precision scaling
-    double scaledDx, scaledDy;
-    [_inertia trackDeltaX:deltaX deltaY:deltaY outDeltaX:&scaledDx outDeltaY:&scaledDy];
-    
-    [self applyDeltaX:scaledDx deltaY:scaledDy];
+    /// Feed input into the flywheel — mouse movement = pedaling force
+    [_inertia pedalDeltaX:deltaX deltaY:deltaY];
 }
 
 + (void)applyDeltaX:(double)deltaX deltaY:(double)deltaY {
@@ -130,7 +130,7 @@ static const double kAxisSwitchRatio = 3.0;        /// Other axis must be Nx dom
         BOOL volumeOnHorizontal = [_drag->type isEqualToString:kMFModifiedDragTypeBrightnessVolume];
         
         if (_combinedIsVertical) {
-            double vertDelta = -deltaY / 250.0;
+            double vertDelta = -deltaY / 500.0;
             if (fabs(vertDelta) < 0.0001) return;
             if (volumeOnHorizontal) {
                 [ScrollOutputUtility adjustBrightnessByDelta:(float)vertDelta forDisplayID:_targetDisplayID];
@@ -139,7 +139,7 @@ static const double kAxisSwitchRatio = 3.0;        /// Other axis must be Nx dom
                 [ScrollOutputUtility setSystemVolume:newVolume];
             }
         } else {
-            double horizDelta = deltaX / 250.0;
+            double horizDelta = deltaX / 500.0;
             if (fabs(horizDelta) < 0.0001) return;
             if (volumeOnHorizontal) {
                 float newVolume = [ScrollOutputUtility getSystemVolume] + (float)horizDelta;
@@ -154,7 +154,7 @@ static const double kAxisSwitchRatio = 3.0;        /// Other axis must be Nx dom
     BOOL isHorizontal = [_drag->type isEqualToString:kMFModifiedDragTypeVolumeHorizontal]
                      || [_drag->type isEqualToString:kMFModifiedDragTypeBrightnessHorizontal];
     
-    double delta = isHorizontal ? (deltaX / 250.0) : (-deltaY / 250.0);
+    double delta = isHorizontal ? (deltaX / 500.0) : (-deltaY / 500.0);
     
     BOOL isVolume = [_drag->type isEqualToString:kMFModifiedDragTypeVolume]
                  || [_drag->type isEqualToString:kMFModifiedDragTypeVolumeHorizontal];
@@ -168,18 +168,14 @@ static const double kAxisSwitchRatio = 3.0;        /// Other axis must be Nx dom
 }
 
 + (void)handleDeactivationWhileInUseWithCancel:(BOOL)cancel {
-    /// Unfreeze pointer
     [PointerFreeze unfreeze];
     
     if (cancel) {
+        /// Hard stop — cancel kills flywheel immediately
         [_inertia cancel];
-    } else {
-        /// Start fling — slow velocity scale so the fling feels weighty on the small volume slider
-        __weak id weakSelf = self;
-        [_inertia startFlingWithVelocityScale:0.12 callback:^(double dx, double dy) {
-            [weakSelf applyDeltaX:dx deltaY:dy];
-        }];
     }
+    /// Normal release: flywheel keeps coasting via its timer until velocity decays to zero.
+    /// No fling needed — the flywheel IS the momentum.
 }
 
 + (void)suspend {

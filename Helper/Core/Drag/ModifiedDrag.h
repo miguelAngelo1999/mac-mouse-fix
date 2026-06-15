@@ -92,6 +92,7 @@ typedef struct {
 + (void)deactivateWithCancel:(BOOL)cancel;
 
 + (BOOL)isInUse;
++ (BOOL)isActive;
 
 //+ (void)handleMouseInputWithDeltaX:(int64_t)deltaX deltaY:(int64_t)deltaY event:(CGEventRef _Nullable)event;
 
