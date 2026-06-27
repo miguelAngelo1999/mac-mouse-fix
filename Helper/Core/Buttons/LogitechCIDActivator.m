@@ -188,8 +188,42 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     if (self) {
         _states = [NSMutableArray array];
         _openReceivers = [NSMutableSet set];
+        
+        /// Re-probe all devices after system wake — HID++ diversion is lost on sleep
+        [NSWorkspace.sharedWorkspace.notificationCenter
+            addObserverForName:NSWorkspaceDidWakeNotification
+            object:nil queue:NSOperationQueue.mainQueue
+            usingBlock:^(NSNotification *note) {
+                [self handleSystemWake];
+            }];
     }
     return self;
+}
+
+- (void)handleSystemWake {
+    DDLogInfo(@"LogitechCIDActivator: system woke — re-probing all devices");
+    
+    /// Clear all existing states (devices need to be re-diverted after sleep)
+    for (NSValue *v in _states) {
+        MFCIDDeviceState *s = (MFCIDDeviceState *)v.pointerValue;
+        /// Release any held buttons
+        for (int i = 0; i < s->pressedCount; i++) injectButton(s, s->pressedCIDs[i], NO);
+        free(s);
+    }
+    [_states removeAllObjects];
+    
+    /// Re-probe all open receivers after a short delay to let USB/BT settle after wake
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        for (NSValue *rv in self->_openReceivers) {
+            IOHIDDeviceRef rcv = (IOHIDDeviceRef)rv.pointerValue;
+            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+                [self probeReceiverSlots:rcv];
+            });
+        }
+    });
+    
+    /// Note: direct BT devices will re-trigger handleDeviceAttached naturally via IOHIDManager
+    /// as the system re-enumerates them after wake. No need to re-probe those manually.
 }
 
 - (void)handleDeviceAttached:(IOHIDDeviceRef)device {

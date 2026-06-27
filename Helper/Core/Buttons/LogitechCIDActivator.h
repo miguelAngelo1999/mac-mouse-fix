@@ -31,4 +31,7 @@
 /// Call when a device is removed. Cleans up state for that device.
 - (void)handleDeviceRemoved: (IOHIDDeviceRef)device;
 
+/// Re-probes all devices after system wake (called automatically via NSWorkspaceDidWakeNotification).
+- (void)handleSystemWake;
+
 @end
