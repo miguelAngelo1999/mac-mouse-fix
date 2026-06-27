@@ -29,6 +29,7 @@
 
 #import "ModifiedDragOutputThreeFingerSwipe.h"
 #import "ModifiedDragOutputTwoFingerSwipe.h"
+#import "ModifiedDragOutputThreeFingerSwipe.h"
 #import "ModifiedDragOutputFakeDrag.h"
 #import "ModifiedDragOutputAddMode.h"
 #import "ModifiedDragOutputVolumeBrightness.h"
@@ -97,6 +98,7 @@ static ModifiedDragState _drag;
     
     /// Init plugins
     [ModifiedDragOutputTwoFingerSwipe load_Manual];
+    [ModifiedDragOutputThreeFingerSwipe load_Manual]; /// Detects OS version for Spaces/Mission Control fallback
     
     /// Setup dispatch queue
     ///     This allows us to process events in the right order

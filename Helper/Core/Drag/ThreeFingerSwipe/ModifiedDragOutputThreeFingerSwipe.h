@@ -14,6 +14,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ModifiedDragOutputThreeFingerSwipe : NSObject<ModifiedDragOutputPlugin>
 
++ (void)load_Manual;
+
 @end
 
 NS_ASSUME_NONNULL_END
