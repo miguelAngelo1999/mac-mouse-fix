@@ -170,8 +170,9 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
 // MARK: - Objective-C class
 
 @interface LogitechCIDActivator ()
-@property (nonatomic) NSMutableArray *states;           // Active MFCIDDeviceState (as NSValue)
-@property (nonatomic) NSMutableSet *openReceivers;      // IOHIDDeviceRef kept open for re-probing
+@property (nonatomic) NSMutableArray *states;
+@property (nonatomic) NSMutableSet *openReceivers;
+@property (nonatomic) NSTimer *keepAliveTimer;
 @end
 
 @implementation LogitechCIDActivator
@@ -189,18 +190,59 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
         _states = [NSMutableArray array];
         _openReceivers = [NSMutableSet set];
         
-        /// Re-probe all devices after system wake — HID++ diversion is lost on sleep
+        /// NSWorkspaceDidWakeNotification — fires when system wakes from sleep
         [NSWorkspace.sharedWorkspace.notificationCenter
             addObserverForName:NSWorkspaceDidWakeNotification
             object:nil queue:NSOperationQueue.mainQueue
             usingBlock:^(NSNotification *note) {
+                NSLog(@"LogitechCIDActivator: NSWorkspaceDidWakeNotification");
                 [self handleSystemWake];
             }];
+        
+        /// NSWorkspaceScreensDidWakeNotification — fires when display wakes (more reliable for display sleep)
+        [NSWorkspace.sharedWorkspace.notificationCenter
+            addObserverForName:NSWorkspaceScreensDidWakeNotification
+            object:nil queue:NSOperationQueue.mainQueue
+            usingBlock:^(NSNotification *note) {
+                NSLog(@"LogitechCIDActivator: NSWorkspaceScreensDidWakeNotification");
+                [self handleSystemWake];
+            }];
+        
+        /// Periodic keep-alive: Logitech firmware can reset CID diversion after ~30-60s
+        /// of inactivity or on firmware events. Re-divert every 25s to stay ahead of it.
+        _keepAliveTimer = [NSTimer scheduledTimerWithTimeInterval:25.0
+                                                          target:self
+                                                        selector:@selector(keepAliveTicket)
+                                                        userInfo:nil
+                                                         repeats:YES];
     }
     return self;
 }
 
+- (void)keepAliveTicket {
+    if (_states.count == 0 && _openReceivers.count == 0) return;
+    
+    DDLogDebug(@"LogitechCIDActivator: keep-alive re-divert (%lu active states)", (unsigned long)_states.count);
+    
+    /// Re-divert all active states — re-sends SetCidReporting for each diverted CID
+    /// This is fast (just HID++ commands, no full reprobe) and keeps diversion alive.
+    dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
+        for (NSValue *v in self->_states) {
+            MFCIDDeviceState *s = (MFCIDDeviceState *)v.pointerValue;
+            activateDevice(s->device, s);
+        }
+        
+        /// Also re-probe receiver slots in case a device rejoined without triggering attach
+        for (NSValue *rv in self->_openReceivers) {
+            IOHIDDeviceRef rcv = (IOHIDDeviceRef)rv.pointerValue;
+            [self probeReceiverSlots:rcv];
+        }
+    });
+}
+
 - (void)handleSystemWake {
+    NSLog(@"LogitechCIDActivator: handleSystemWake called — %lu states, %lu receivers",
+          (unsigned long)_states.count, (unsigned long)_openReceivers.count);
     DDLogInfo(@"LogitechCIDActivator: system woke — re-probing all devices");
     
     /// Clear all existing states (devices need to be re-diverted after sleep)
