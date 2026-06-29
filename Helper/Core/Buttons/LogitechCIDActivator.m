@@ -10,6 +10,8 @@
 #import <IOKit/hid/IOHIDLib.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import "SharedUtility.h"
+#import "Device.h"
+#import "DeviceManager.h"
 
 #define kLogitechVID    0x046D
 #define kHIDPP_Long     0x11
@@ -241,7 +243,14 @@ static dispatch_queue_t sHIDPPQueue;
     dispatch_async(sHIDPPQueue, ^{
         for (NSValue *v in self->_states) {
             MFCIDDeviceState *s = (MFCIDDeviceState *)v.pointerValue;
-            activateDevice(s->device, s);
+            /// Only re-divert receiver slots — BT devices keep diversion active until disconnect.
+            /// BT re-divert always fails because sendAndWait needs the device's report callback
+            /// on the HID++ queue's run loop, but the device is scheduled on main run loop.
+            if (!s->isReceiver && s->deviceIndex == kHIDPP_DevBLE) continue;
+            int diverted = activateDevice(s->device, s);
+            if (diverted == 0) {
+                NSLog(@"LogitechCIDActivator: keep-alive FAILED for slot %d", s->deviceIndex);
+            }
         }
         
         /// Also re-probe receiver slots in case a device rejoined without triggering attach
@@ -257,16 +266,19 @@ static dispatch_queue_t sHIDPPQueue;
           (unsigned long)_states.count, (unsigned long)_openReceivers.count);
     DDLogInfo(@"LogitechCIDActivator: system woke — re-probing all devices");
     
-    /// Clear all existing states (devices need to be re-diverted after sleep)
+    /// Snapshot states before clearing — we need the BT device refs
+    NSArray *statesCopy = [_states copy];
+    
+    /// Clear all existing states
     for (NSValue *v in _states) {
         MFCIDDeviceState *s = (MFCIDDeviceState *)v.pointerValue;
-        /// Release any held buttons
         for (int i = 0; i < s->pressedCount; i++) injectButton(s, s->pressedCIDs[i], NO);
         free(s);
     }
     [_states removeAllObjects];
+    (void)statesCopy; /// unused for now — BT re-probe happens via handleDeviceAttached below
     
-    /// Re-probe all open receivers after a short delay to let USB/BT settle after wake
+    /// Re-probe receivers on sHIDPPQueue (receiver devices are scheduled on that queue's run loop)
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         for (NSValue *rv in self->_openReceivers) {
             IOHIDDeviceRef rcv = (IOHIDDeviceRef)rv.pointerValue;
@@ -276,8 +288,53 @@ static dispatch_queue_t sHIDPPQueue;
         }
     });
     
-    /// Note: direct BT devices will re-trigger handleDeviceAttached naturally via IOHIDManager
-    /// as the system re-enumerates them after wake. No need to re-probe those manually.
+    /// BT devices: IOHIDManager does NOT re-fire handleDeviceAttached after sleep/wake.
+    /// The device stays "attached" but firmware resets diversion. Re-activate on main queue
+    /// (BT device is scheduled on main run loop — sendAndWait needs it there).
+    /// Use a 2s delay to let BT stack fully reconnect after wake.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [self reactivateBTDevices];
+        NSLog(@"LogitechCIDActivator: wake re-probe complete — %lu states active", (unsigned long)self->_states.count);
+    });
+}
+
+/// Re-divert all attached BT Logitech devices. Called on main queue after wake.
+/// Does NOT re-open devices (they stay open from initial attach).
+- (void)reactivateBTDevices {
+    for (Device *device in DeviceManager.attachedDevices) {
+        IOHIDDeviceRef dev = device.iohidDevice;
+        if (!dev) continue;
+        NSNumber *vid = (__bridge NSNumber *)IOHIDDeviceGetProperty(dev, CFSTR(kIOHIDVendorIDKey));
+        if (vid.integerValue != kLogitechVID) continue;
+        NSNumber *pidNum = (__bridge NSNumber *)IOHIDDeviceGetProperty(dev, CFSTR(kIOHIDProductIDKey));
+        if (isReceiverPID(pidNum.unsignedShortValue)) continue;
+        
+        /// Already active? Skip
+        BOOL alreadyActive = NO;
+        for (NSValue *v in _states) {
+            MFCIDDeviceState *existing = (MFCIDDeviceState *)v.pointerValue;
+            if (existing->device == dev) { alreadyActive = YES; break; }
+        }
+        if (alreadyActive) continue;
+        
+        /// Create state and activate (device is already open and scheduled on main)
+        MFCIDDeviceState *s = calloc(1, sizeof(MFCIDDeviceState));
+        s->device = dev;
+        s->deviceIndex = kHIDPP_DevBLE;
+        s->isReceiver = NO;
+        IOHIDDeviceRegisterInputReportCallback(dev, s->reportBuf, sizeof(s->reportBuf), inputReportCallback, s);
+        
+        sProbingDevIdx = kHIDPP_DevBLE;
+        int diverted = activateDevice(dev, s);
+        if (diverted > 0) {
+            NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(dev, CFSTR(kIOHIDProductKey));
+            NSLog(@"LogitechCIDActivator: re-diverted %d CIDs on '%@' [BT wake]", diverted, name);
+            [_states addObject:[NSValue valueWithPointer:s]];
+        } else {
+            NSLog(@"LogitechCIDActivator: BT wake re-activation failed for device");
+            free(s);
+        }
+    }
 }
 
 - (void)handleDeviceAttached:(IOHIDDeviceRef)device {
@@ -305,19 +362,37 @@ static dispatch_queue_t sHIDPPQueue;
     IOHIDDeviceRegisterInputReportCallback(device, s->reportBuf, sizeof(s->reportBuf), inputReportCallback, s);
     IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
 
-    sProbingDevIdx = kHIDPP_DevBLE;
-    int diverted = activateDevice(device, s);
-    if (diverted > 0) {
-        NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
-        DDLogInfo(@"LogitechCIDActivator: diverted %d CIDs on '%@' [BT]", diverted, name);
-        // Ensure scheduled on main for events
-        IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
-        [_states addObject:[NSValue valueWithPointer:s]];
-    } else {
-        IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
-        IOHIDDeviceClose(device, kIOHIDOptionsTypeNone);
-        free(s);
-    }
+    /// BT: activate on the main run loop where the device is scheduled.
+    /// Use a short delay to let the BT stack fully settle after connect/reconnect.
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        sProbingDevIdx = kHIDPP_DevBLE;
+        int diverted = activateDevice(device, s);
+        if (diverted > 0) {
+            NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
+            NSLog(@"LogitechCIDActivator: diverted %d CIDs on '%@' [BT]", diverted, name);
+            DDLogInfo(@"LogitechCIDActivator: diverted %d CIDs on '%@' [BT]", diverted, name);
+            IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+            [_states addObject:[NSValue valueWithPointer:s]];
+        } else {
+            /// Retry once after another second — BT stack may still be settling
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                sProbingDevIdx = kHIDPP_DevBLE;
+                int diverted2 = activateDevice(device, s);
+                if (diverted2 > 0) {
+                    NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
+                    NSLog(@"LogitechCIDActivator: diverted %d CIDs on '%@' [BT retry]", diverted2, name);
+                    DDLogInfo(@"LogitechCIDActivator: diverted %d CIDs on '%@' [BT retry]", diverted2, name);
+                    IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetMain(), kCFRunLoopDefaultMode);
+                    [self->_states addObject:[NSValue valueWithPointer:s]];
+                } else {
+                    NSLog(@"LogitechCIDActivator: BT activation FAILED after retry — giving up");
+                    IOHIDDeviceUnscheduleFromRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
+                    IOHIDDeviceClose(device, kIOHIDOptionsTypeNone);
+                    free(s);
+                }
+            });
+        }
+    });
 }
 
 - (void)handleReceiverAttached:(IOHIDDeviceRef)device {
@@ -369,6 +444,7 @@ static dispatch_queue_t sHIDPPQueue;
         int diverted = activateDevice(device, s);
         if (diverted > 0) {
             NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
+            NSLog(@"LogitechCIDActivator: diverted %d CIDs via receiver slot %d on '%@'", diverted, devIdx, name);
             DDLogInfo(@"LogitechCIDActivator: diverted %d CIDs via receiver slot %d on '%@'", diverted, devIdx, name);
             // Move to main run loop for event delivery
             dispatch_async(dispatch_get_main_queue(), ^{
