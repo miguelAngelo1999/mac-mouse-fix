@@ -169,6 +169,10 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
 
 // MARK: - Objective-C class
 
+/// Serial queue for all HID++ operations — sendAndWait uses global state (sResp/sGotResp)
+/// and must never run concurrently. All activateDevice/probeReceiverSlots calls must use this.
+static dispatch_queue_t sHIDPPQueue;
+
 @interface LogitechCIDActivator ()
 @property (nonatomic) NSMutableArray *states;
 @property (nonatomic) NSMutableSet *openReceivers;
@@ -189,6 +193,14 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     if (self) {
         _states = [NSMutableArray array];
         _openReceivers = [NSMutableSet set];
+        
+        /// Serial queue for HID++ operations — sendAndWait uses global state, must be serialized
+        static dispatch_once_t once;
+        dispatch_once(&once, ^{
+            dispatch_queue_attr_t attr = dispatch_queue_attr_make_with_qos_class(
+                DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INTERACTIVE, -1);
+            sHIDPPQueue = dispatch_queue_create("com.nuebling.mac-mouse-fix.hidpp", attr);
+        });
         
         /// NSWorkspaceDidWakeNotification — fires when system wakes from sleep
         [NSWorkspace.sharedWorkspace.notificationCenter
@@ -226,7 +238,7 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     
     /// Re-divert all active states — re-sends SetCidReporting for each diverted CID
     /// This is fast (just HID++ commands, no full reprobe) and keeps diversion alive.
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_BACKGROUND, 0), ^{
+    dispatch_async(sHIDPPQueue, ^{
         for (NSValue *v in self->_states) {
             MFCIDDeviceState *s = (MFCIDDeviceState *)v.pointerValue;
             activateDevice(s->device, s);
@@ -258,7 +270,7 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         for (NSValue *rv in self->_openReceivers) {
             IOHIDDeviceRef rcv = (IOHIDDeviceRef)rv.pointerValue;
-            dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+            dispatch_async(sHIDPPQueue, ^{
                 [self probeReceiverSlots:rcv];
             });
         }
@@ -316,7 +328,7 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
     if (!isHIDPP) return;
 
     if ([_openReceivers containsObject:[NSValue valueWithPointer:device]]) {
-        dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+        dispatch_async(sHIDPPQueue, ^{
             [self probeReceiverSlots:device];
         });
         return;
@@ -324,7 +336,7 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
 
     if (IOHIDDeviceOpen(device, kIOHIDOptionsTypeNone) != kIOReturnSuccess) return;
     [_openReceivers addObject:[NSValue valueWithPointer:device]];
-    dispatch_async(dispatch_get_global_queue(QOS_CLASS_USER_INTERACTIVE, 0), ^{
+    dispatch_async(sHIDPPQueue, ^{
         [self probeReceiverSlots:device];
     });
 }
@@ -400,7 +412,9 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             for (NSValue *rv in self->_openReceivers) {
                 IOHIDDeviceRef rcv = (IOHIDDeviceRef)rv.pointerValue;
-                [self probeReceiverSlots:rcv];
+                dispatch_async(sHIDPPQueue, ^{
+                    [self probeReceiverSlots:rcv];
+                });
             }
         });
     }
