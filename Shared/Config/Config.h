@@ -43,6 +43,7 @@ void commitConfig(void);
 
 /// Overrides
 - (BOOL)loadOverridesForAppUnderMousePointerWithEvent:(CGEventRef)event;
+- (void)loadOverridesForApp:(NSString *)bundleID;
 @property (strong, nonatomic, readonly) NSMutableDictionary *configWithAppOverridesApplied; /// [Aug 2025] This could just be an ivar
 
 /// React

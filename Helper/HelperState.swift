@@ -45,6 +45,18 @@ import CoreGraphics
             SwitchMaster.shared.helperStateChanged()
         }
         
+        /// Listen to frontmost app changes — reload per-app config overrides on Cmd-Tab
+        NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { notification in
+            guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+                  let bundleID = app.bundleIdentifier else { return }
+            let overrides = Config.shared().config[kMFConfigKeyAppOverrides] as? NSDictionary
+            if (overrides?.count ?? 0) > 0 {
+                Config.shared().loadOverrides(forApp: bundleID)
+                ScrollConfig.reload()
+                Remap.reload()
+                PointerConfig.reload()
+            }
+        }
     }
     
     private func userIsActive_Manual() -> Bool {

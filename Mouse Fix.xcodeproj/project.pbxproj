@@ -83,6 +83,7 @@
 		4F7AB0552606698A0008055E /* UIStrings.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F7AB0542606698A0008055E /* UIStrings.m */; };
 		4F7CFFF12E60F4B900ACEDEF /* Bug Log [Aug 2025] - Scroll Stopped Working.md in Resources */ = {isa = PBXBuildFile; fileRef = 4F7CFFF02E60F4B900ACEDEF /* Bug Log [Aug 2025] - Scroll Stopped Working.md */; };
 		4F7D97A628AEB2EE00C11E79 /* AboutTabController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F7D97A528AEB2EE00C11E79 /* AboutTabController.swift */; };
+			AA001234AABB1234AA001234 /* AppsTabController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA001234AABB1234AA001235 /* AppsTabController.swift */; };
 		4F7F47C528A5A01600290BBD /* ReactiveConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDC127528A2C6160076972E /* ReactiveConfig.swift */; };
 		4F7F47CB28A5A03100290BBD /* ReactiveConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDC127528A2C6160076972E /* ReactiveConfig.swift */; };
 		4F7F47CE28A5B5EC00290BBD /* ReactiveSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 4F7F47CD28A5B5EC00290BBD /* ReactiveSwift */; };
@@ -2099,6 +2100,7 @@
 		4F7D97A228AEB04D00C11E79 /* Westfalia-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Westfalia-Regular.otf"; sourceTree = "<group>"; };
 		4F7D97A428AEB14A00C11E79 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		4F7D97A528AEB2EE00C11E79 /* AboutTabController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutTabController.swift; sourceTree = "<group>"; };
+			AA001234AABB1234AA001235 /* AppsTabController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppsTabController.swift; sourceTree = "<group>"; };
 		4F7F47D228A6EFC800290BBD /* SharedAssets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = SharedAssets.xcassets; sourceTree = "<group>"; };
 		4F7F47D628A6F00300290BBD /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		4F800D01292B2550007DE69F /* Modifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
@@ -6672,6 +6674,7 @@
 				4F909CF728A0C3D2009349A2 /* ScrollTabController.swift */,
 				4F909CF828A0C3D2009349A2 /* PointerTabController.swift */,
 				4F7D97A528AEB2EE00C11E79 /* AboutTabController.swift */,
+					AA001234AABB1234AA001235 /* AppsTabController.swift */,
 			);
 			path = Tabs;
 			sourceTree = "<group>";
@@ -8116,6 +8119,7 @@
 				4F4C66172E636584005C2612 /* NSBox+Additions.m in Sources */,
 				4FF6660225F2C92700689B77 /* ClickableImageView.m in Sources */,
 				4F7D97A628AEB2EE00C11E79 /* AboutTabController.swift in Sources */,
+					AA001234AABB1234AA001234 /* AppsTabController.swift in Sources */,
 				4F79A81C2604317200076A7E /* ToastNotificationController.m in Sources */,
 				4F909D2E28A0C3D2009349A2 /* NSControl+Extensions.swift in Sources */,
 				4FA398FE2D56409A003A4BEE /* TreeNode.m in Sources */,

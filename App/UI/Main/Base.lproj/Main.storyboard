@@ -238,6 +238,11 @@
                                 <fragment content="Toolbar &gt; About Tab Button"/>
                             </attributedString>
                         </tabViewItem>
+                        <tabViewItem label="Apps" identifier="apps" image="app.badge.checkmark" catalog="system" id="mF8-ap-ps1">
+                            <attributedString key="userComments">
+                                <fragment content="Toolbar &gt; Apps Tab Button"/>
+                            </attributedString>
+                        </tabViewItem>
                     </tabViewItems>
                     <viewControllerTransitionOptions key="transitionOptions" allowUserInteraction="YES"/>
                     <tabView key="tabView" type="noTabsNoBorder" id="oqi-09-EfH">
@@ -256,6 +261,7 @@
                         <segue destination="qcW-e9-BqR" kind="relationship" relationship="tabItems" id="8Vk-gd-khS"/>
                         <segue destination="1dS-BH-DIv" kind="relationship" relationship="tabItems" id="0ZF-Yb-Oso"/>
                         <segue destination="buH-zX-xXu" kind="relationship" relationship="tabItems" id="LEK-6t-9Lm"/>
+                        <segue destination="aT9-pp-ctrl" kind="relationship" relationship="tabItems" id="mF8-sg-ap1"/>
                     </connections>
                 </tabViewController>
                 <customObject id="ToD-Hp-5TT" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -2422,6 +2428,19 @@ System Preferences &gt; Mouse &gt; Tracking speed </string>
                 <customObject id="xN7-0P-7Zw" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1128" y="1580"/>
+        </scene>
+        <!--Apps View Controller-->
+        <scene sceneID="aT9-sc-ap1">
+            <objects>
+                <viewController title="Apps" id="aT9-pp-ctrl" userLabel="Apps View Controller" customClass="AppsTabController" customModule="Mac_Mouse_Fix" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" id="aT9-vw-ap1">
+                        <rect key="frame" x="0.0" y="0.0" width="450" height="400"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </view>
+                </viewController>
+                <customObject id="aT9-fr-ap1" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1128" y="2200"/>
         </scene>
         <!--<Initial Tab Controller>-->
         <scene sceneID="R82-b2-ukC">

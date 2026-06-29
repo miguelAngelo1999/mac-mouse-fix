@@ -180,19 +180,18 @@ void commitConfig(void) {
 
 - (BOOL)loadOverridesForAppUnderMousePointerWithEvent:(CGEventRef)event {
     
-    /// Unused in MMF 3
-    ///     Reactivate when we reimplement app-specific settings.
-    return NO;
-    
     /// Returns yes when it's made a change
     /// TODO: Add compatibility for command line executables
     /// TODO: Look into using kCGMouseEventWindowUnderMousePointer to get the window under the mouse pointer
     
     /// Validate
-    
     assert(runningHelper());
     
 #if IS_HELPER
+    
+    /// Only do something if there are app overrides in the config
+    NSDictionary *overrides = [self->_config objectForKey:kMFConfigKeyAppOverrides];
+    if (overrides.count == 0) return NO;
     
     /// Get bundleID
     NSRunningApplication *app = [HelperUtility appUnderMousePointerWithEvent:event];

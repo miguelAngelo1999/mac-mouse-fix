@@ -46,7 +46,7 @@ class TabViewController: NSTabViewController {
     
     // MARK: Constants
     ///     TODO: Think about using validTabs in different places / if using it at all makes sense in the grand architecture
-    private let validTabs = ["general", "buttons", "scrolling", "about"]
+    private let validTabs = ["general", "buttons", "scrolling", "about", "apps"]
     
     private var window: ResizingTabWindow? {
         if let w = self.tabView.window as? ResizingTabWindow {

@@ -45,7 +45,7 @@ import CocoaLumberjackSwift
         
         /// Guard not equal
         
-        let newConfigRaw = config("Scroll") as! NSDictionary?
+        let newConfigRaw = Config.shared().configWithAppOverridesApplied["Scroll"] as! NSDictionary?
         guard !(_scrollConfigRaw?.isEqual(newConfigRaw) ?? false) else {
             return
         }

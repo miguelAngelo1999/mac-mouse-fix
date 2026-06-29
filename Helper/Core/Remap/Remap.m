@@ -220,7 +220,7 @@ static NSDictionary *_remaps;
             
         /// Convert remaps table to remaps dict
         
-        NSArray *remapsTable = [Config.shared.config objectForKey:kMFConfigKeyRemaps];
+        NSArray *remapsTable = [Config.shared.configWithAppOverridesApplied objectForKey:kMFConfigKeyRemaps];
         
         for (NSDictionary *tableEntry in remapsTable) {
             /// Get modification precondition section of keypath
