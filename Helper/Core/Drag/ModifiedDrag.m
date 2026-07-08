@@ -10,6 +10,7 @@
 #import "Constants.h"
 
 #import "ModifiedDrag.h"
+#import "ModTapCoordinator.h"
 #import "ScrollModifiers.h"
 #import "GestureScrollSimulator.h"
 #import "Modifiers.h"
@@ -466,6 +467,9 @@ void deactivate_Unsafe(BOOL cancel) {
     ///     Notify plugin
     if (_drag.activationState == kMFModifiedInputActivationStateInUse) {
         [_drag.outputPlugin handleDeactivationWhileInUseWithCancel:cancel];
+        /// Reset ModTap state — drag may have consumed the button-up event before ModTap
+        /// could process it, leaving _primaryButtonModifierLayerActive stuck as YES.
+        [[ModTapCoordinator shared] forceReset];
     }
     
     /// Set state == none

@@ -51,8 +51,8 @@
     BOOL layerEnabled = [(id)config(@"General.primaryButtonModifierLayer") boolValue];
     if (!layerEnabled) return NO;
     
-    BOOL isModifierCapableButton = (buttonNumber >= 4); /// Buttons 4, 5, 6+ are thumb-accessible
-    BOOL isPrimaryButton = (buttonNumber == 1 || buttonNumber == 2);
+    BOOL isModifierCapableButton = (buttonNumber >= 2 && buttonNumber != 1); /// Buttons 2 (right click), 4, 5, 6+ are usable as modifiers/triggers
+    BOOL isPrimaryButton = (buttonNumber == 1);
     
     switch (_state) {
             
@@ -199,6 +199,15 @@
     }
     _pendingDevice = nil;
     _pendingButton = 0;
+    /// Always clear primary button interception on reset — prevents stuck state
+    /// if button-up is consumed by drag system before reaching ModTap
+    [ButtonInputReceiver setPrimaryButtonModifierLayerActive:NO];
+}
+
+- (void)forceReset {
+    [_tappingTimer invalidate];
+    _tappingTimer = nil;
+    [self resetState]; /// resetState now always clears primaryButtonModifierLayerActive
 }
 
 - (void)dealloc {

@@ -33,5 +33,7 @@
 
 /// Re-probes all devices after system wake (called automatically via NSWorkspaceDidWakeNotification).
 - (void)handleSystemWake;
+/// Re-diverts CIDs for a state after device reconnect (called from inputReportCallback DJ_PAIRING).
+- (void)reactivateState:(void *)state;
 
 @end

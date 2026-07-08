@@ -359,6 +359,7 @@ class AppsTabController: NSViewController, NSTableViewDataSource, NSTableViewDel
     // MARK: NSTableViewDelegate
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        guard row < rows.count else { return nil }
         let app = rows[row]
         
         let cell = NSTableCellView()

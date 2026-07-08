@@ -34,6 +34,10 @@ typedef enum {
                  mouseDown:(BOOL)mouseDown
                     event:(CGEventRef)event;
 
+/// Force-reset mod-tap state — call when drag or other system deactivates while a modifier
+/// button is still considered held (prevents stuck primaryButtonModifierLayerActive state).
+- (void)forceReset;
+
 /// Configuration
 @property (nonatomic) NSTimeInterval tappingTerm; /// Default 180ms
 

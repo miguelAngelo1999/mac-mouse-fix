@@ -228,10 +228,57 @@ static const double kFlywheelFrameRate    = 120.0;  /// Hz
     }];
 }
 
+// MARK: - Direct velocity fling
+
+- (void)startFlingWithDirectVx:(double)vx vy:(double)vy callback:(DragInertiaCallback)callback {
+    /// Same DragCurve physics as startFlingWithVelocityScale: but takes pre-computed exit velocity.
+    /// Use when the internal EMA timestamp is stale (e.g. smoothingAnimator delay in TwoFingerSwipe).
+    
+    [_animator cancel_forAutoMomentumScroll:YES];
+    
+    double exitSpeed = sqrt(vx*vx + vy*vy);
+    if (exitSpeed <= kFlingStopSpeed) return;
+    
+    Vector exitVelocity = (Vector){ .x = vx, .y = vy };
+    
+    [_animator resetSubPixelator];
+    [_animator linkToMainScreen];
+    
+    [_animator startWithParams:^NSDictionary<NSString *,id> * _Nonnull(Vector valueLeft, BOOL isRunning, Curve * _Nullable curve, Vector currentSpeed) {
+        NSMutableDictionary *p = [NSMutableDictionary dictionary];
+        
+        double initialSpeed = magnitudeOfVector(exitVelocity);
+        if (initialSpeed <= kFlingStopSpeed) {
+            p[@"doStart"] = @(NO);
+            return p;
+        }
+        
+        DragCurve *animationCurve = [[DragCurve alloc]
+                                     initWithCoefficient:kFlingDragCoefficient
+                                     exponent:kFlingDragExponent
+                                     initialSpeed:initialSpeed
+                                     stopSpeed:kFlingStopSpeed];
+        
+        double duration = animationCurve.timeInterval.length;
+        double distance = animationCurve.distanceInterval.length;
+        
+        Vector unit = unitVector(exitVelocity);
+        Vector distanceVec = scaledVector(unit, distance);
+        
+        p[@"vector"]   = nsValueFromVector(distanceVec);
+        p[@"duration"] = @(duration);
+        p[@"curve"]    = animationCurve;
+        return p;
+        
+    } integerCallback:^(Vector deltaVec, MFAnimationCallbackPhase animationPhase, MFMomentumHint hint) {
+        if (animationPhase == kMFAnimationCallbackPhaseEnd) return;
+        callback(deltaVec.x, deltaVec.y);
+    }];
+}
+
 // MARK: - Cancel
 
 - (void)cancel {
-    [_animator cancel_forAutoMomentumScroll:YES];
     [self stopFlywheelTimer];
     _vx = 0; _vy = 0;
     _lastEventTime = 0;

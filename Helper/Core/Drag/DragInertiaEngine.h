@@ -33,6 +33,11 @@ typedef void(^DragInertiaCallback)(double dx, double dy);
 - (void)startFlingWithVelocityScale:(double)velocityScale
                            callback:(DragInertiaCallback)callback;
 
+/// Start fling with a pre-computed exit velocity (vx, vy in px/s).
+/// Bypasses the internal EMA — use when the EMA timestamp is stale (e.g. after smoothingAnimator delay).
+- (void)startFlingWithDirectVx:(double)vx vy:(double)vy
+                      callback:(DragInertiaCallback)callback;
+
 /// Cancel any running fling (call on new drag start).
 - (void)cancel;
 

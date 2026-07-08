@@ -193,12 +193,25 @@ static int64_t _lastRawDy;
     __block BOOL firstFlingCallback = YES;
     
     /// Non-linear velocity scale: hard flings get extra momentum, gentle releases stay gentle.
-    /// _swipeInertia internally tracks EMA velocity — we infer exit speed from last raw deltas.
-    /// A hard flick produces large raw deltas (20-60px/event); gentle stop is 1-3px/event.
+    /// Use last raw deltas directly — EMA in _swipeInertia lags due to smoothingAnimator delay.
     double rawSpeed = sqrt((double)_lastRawDx * _lastRawDx + (double)_lastRawDy * _lastRawDy);
     double velocityScale = 1.0 + fmin(rawSpeed / 20.0, 2.0); /// 1x–3x boost at rawSpeed≥40
     
-    [_swipeInertia startFlingWithVelocityScale:velocityScale callback:^(double dx, double dy) {
+    /// Bypass the EMA time-gap guard: inject a synthetic velocity refresh so DragInertiaEngine
+    /// sees a recent timestamp. The smoothingAnimator adds ~50ms lag making timeSinceLastInput
+    /// exceed kMouseMovingMaxInterval (80ms) and killing the fling. We use rawSpeed directly
+    /// to build exit velocity — skip startFlingWithVelocityScale and drive the animator ourselves.
+    if (rawSpeed < 3.0) return; /// Nothing to fling
+    
+    double angle = atan2(_lastRawDy, _lastRawDx);
+    double exitSpeed = rawSpeed * velocityScale * 12.0; /// px/s — tuned to match RotateZoom feel
+    double evx = cos(angle) * exitSpeed;
+    double evy = sin(angle) * exitSpeed;
+    
+    [_swipeInertia cancel]; /// clear stale EMA state
+    
+    /// Rebuild animator-based fling directly, same physics as RotateZoom path
+    [_swipeInertia startFlingWithDirectVx:evx vy:evy callback:^(double dx, double dy) {
         CGMomentumScrollPhase phase = firstFlingCallback ? kCGMomentumScrollPhaseBegin : kCGMomentumScrollPhaseContinue;
         firstFlingCallback = NO;
         [GestureScrollSimulator postMomentumScrollDirectlyWithDeltaX:dx deltaY:dy momentumPhase:phase invertedFromDevice:naturalDirection];

@@ -99,6 +99,25 @@ static void inputReportCallback(void *ctx, IOReturn result, void *sender,
         return;
     }
 
+    // Logitech DJ_PAIRING notification (0x41) — device connection/disconnection event.
+    // Fired by receiver when a wireless device connects, reconnects, or wakes from idle sleep.
+    // report[2] = 0x41 (DJ_PAIRING sub_id)
+    // report[3] = protocol type (0x04=Unifying, 0x10=Bolt, 0x02=27MHz) — always > 0x00
+    // report[4] = flags: bit6 (0x40) = 0 → connected, bit6 = 1 → disconnected
+    if (report[2] == 0x41 && report[3] > 0x00) {
+        uint8_t flags = report[4] & 0xF0;
+        BOOL linkEstablished = !(flags & 0x40); /// bit 6 clear = connected
+        if (!linkEstablished) return; /// disconnection — ignore, handleDeviceRemoved will clean up
+        
+        NSLog(@"LogitechCIDActivator: DJ_PAIRING connection event for slot %d — re-diverting", reportDevIdx);
+        MFCIDDeviceState *s = (MFCIDDeviceState *)ctx;
+        /// Schedule re-divert on main queue — actual activation happens via the shared instance
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[LogitechCIDActivator shared] reactivateState:s];
+        });
+        return;
+    }
+
     // CID button event — find matching state by device index
     MFCIDDeviceState *s = (MFCIDDeviceState *)ctx;
     if (s->deviceIndex != reportDevIdx) return;
@@ -157,6 +176,18 @@ static int activateDevice(IOHIDDeviceRef dev, MFCIDDeviceState *s) {
 
     // 4. Pre-register button mapping
     for (int i = 0; i < ndiv; i++) buttonForCID(s, todivert[i]);
+    NSLog(@"LogitechCIDActivator: CIDs to divert on slot %d: count=%d", devIdx, ndiv);
+    {
+        FILE *f = fopen("/Users/virgoh/Library/Application Support/com.virgoh.mac-mouse-fix/cid_map.log", "a");
+        if (f) {
+            fprintf(f, "=== Slot %d activation ===\n", devIdx);
+            for (int i = 0; i < ndiv; i++) {
+                int btn = buttonForCID(s, todivert[i]);
+                fprintf(f, "  CID 0x%04X -> button %d\n", todivert[i], btn);
+            }
+            fflush(f); fclose(f);
+        }
+    }
 
     // 5. SetCidReporting — divert
     int diverted = 0;
@@ -179,6 +210,8 @@ static dispatch_queue_t sHIDPPQueue;
 @property (nonatomic) NSMutableArray *states;
 @property (nonatomic) NSMutableSet *openReceivers;
 @property (nonatomic) NSTimer *keepAliveTimer;
+@property (nonatomic) BOOL wakeHandlerPending; /// Debounce: only run one handleSystemWake per wake cycle
+- (void)reactivateBTDevicesWithAttempt:(int)attempt;
 @end
 
 @implementation LogitechCIDActivator
@@ -210,7 +243,10 @@ static dispatch_queue_t sHIDPPQueue;
             object:nil queue:NSOperationQueue.mainQueue
             usingBlock:^(NSNotification *note) {
                 NSLog(@"LogitechCIDActivator: NSWorkspaceDidWakeNotification");
-                [self handleSystemWake];
+                if (!self->_wakeHandlerPending) {
+                    self->_wakeHandlerPending = YES;
+                    [self handleSystemWake];
+                }
             }];
         
         /// NSWorkspaceScreensDidWakeNotification — fires when display wakes (more reliable for display sleep)
@@ -219,7 +255,10 @@ static dispatch_queue_t sHIDPPQueue;
             object:nil queue:NSOperationQueue.mainQueue
             usingBlock:^(NSNotification *note) {
                 NSLog(@"LogitechCIDActivator: NSWorkspaceScreensDidWakeNotification");
-                [self handleSystemWake];
+                if (!self->_wakeHandlerPending) {
+                    self->_wakeHandlerPending = YES;
+                    [self handleSystemWake];
+                }
             }];
         
         /// Periodic keep-alive: Logitech firmware can reset CID diversion after ~30-60s
@@ -229,6 +268,15 @@ static dispatch_queue_t sHIDPPQueue;
                                                         selector:@selector(keepAliveTicket)
                                                         userInfo:nil
                                                          repeats:YES];
+        
+        /// Proactive startup scan: if IOHIDManager already has the device attached but
+        /// handleDeviceAttached didn't fire yet (race on helper start), catch it here.
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            if (self->_states.count == 0) {
+                NSLog(@"LogitechCIDActivator: no states after 3s startup — probing attached devices");
+                [self reactivateBTDevices];
+            }
+        });
     }
     return self;
 }
@@ -292,15 +340,35 @@ static dispatch_queue_t sHIDPPQueue;
     /// The device stays "attached" but firmware resets diversion. Re-activate on main queue
     /// (BT device is scheduled on main run loop — sendAndWait needs it there).
     /// Use a 2s delay to let BT stack fully reconnect after wake.
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         [self reactivateBTDevices];
+        self->_wakeHandlerPending = NO; /// Reset debounce — ready for next wake cycle
         NSLog(@"LogitechCIDActivator: wake re-probe complete — %lu states active", (unsigned long)self->_states.count);
     });
 }
 
 /// Re-divert all attached BT Logitech devices. Called on main queue after wake.
 /// Does NOT re-open devices (they stay open from initial attach).
+/// Re-divert CIDs for an existing state after the device reconnects.
+/// Called on main queue from inputReportCallback when a DJ_PAIRING connection event arrives.
+- (void)reactivateState:(MFCIDDeviceState *)s {
+    dispatch_async(sHIDPPQueue, ^{
+        int diverted = activateDevice(s->device, s);
+        if (diverted > 0) {
+            NSLog(@"LogitechCIDActivator: re-diverted %d CIDs after DJ_PAIRING [slot %d]", diverted, s->deviceIndex);
+        } else {
+            NSLog(@"LogitechCIDActivator: re-divert after DJ_PAIRING FAILED [slot %d]", s->deviceIndex);
+        }
+    });
+}
+
 - (void)reactivateBTDevices {
+    [self reactivateBTDevicesWithAttempt:1];
+}
+
+- (void)reactivateBTDevicesWithAttempt:(int)attempt {
+    int activated = 0;
+    
     for (Device *device in DeviceManager.attachedDevices) {
         IOHIDDeviceRef dev = device.iohidDevice;
         if (!dev) continue;
@@ -315,7 +383,7 @@ static dispatch_queue_t sHIDPPQueue;
             MFCIDDeviceState *existing = (MFCIDDeviceState *)v.pointerValue;
             if (existing->device == dev) { alreadyActive = YES; break; }
         }
-        if (alreadyActive) continue;
+        if (alreadyActive) { activated++; continue; }
         
         /// Create state and activate (device is already open and scheduled on main)
         MFCIDDeviceState *s = calloc(1, sizeof(MFCIDDeviceState));
@@ -328,12 +396,24 @@ static dispatch_queue_t sHIDPPQueue;
         int diverted = activateDevice(dev, s);
         if (diverted > 0) {
             NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(dev, CFSTR(kIOHIDProductKey));
-            NSLog(@"LogitechCIDActivator: re-diverted %d CIDs on '%@' [BT wake]", diverted, name);
+            NSLog(@"LogitechCIDActivator: re-diverted %d CIDs on '%@' [BT wake attempt %d]", diverted, name, attempt);
             [_states addObject:[NSValue valueWithPointer:s]];
+            activated++;
         } else {
-            NSLog(@"LogitechCIDActivator: BT wake re-activation failed for device");
+            NSLog(@"LogitechCIDActivator: BT wake re-activation failed (attempt %d)", attempt);
             free(s);
         }
+    }
+    
+    /// If nothing activated yet and we have retries left, schedule another attempt.
+    /// Delays: attempt 1 = 5s, attempt 2 = 8s, attempt 3 = 12s, attempt 4 = 18s
+    static const double kRetryDelays[] = { 3.0, 4.0, 6.0 }; /// additional delays after first attempt
+    if (activated == 0 && attempt <= 3) {
+        double delay = kRetryDelays[attempt - 1];
+        NSLog(@"LogitechCIDActivator: scheduling BT wake retry %d in %.0fs", attempt + 1, delay);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self reactivateBTDevicesWithAttempt:attempt + 1];
+        });
     }
 }
 

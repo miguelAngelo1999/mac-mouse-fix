@@ -137,7 +137,7 @@ static CGEventRef eventTapCallback(CGEventTapProxy proxy, CGEventType type, CGEv
     /// Filter buttons
     /// When no button modifier is held, let primary buttons (1, 2) pass through untouched.
     /// When a modifier layer IS active, intercept them for remapping.
-    if (!_primaryButtonModifierLayerActive && (buttonNumber == 1 || buttonNumber == 2)) {
+    if (!_primaryButtonModifierLayerActive && (buttonNumber == 1)) {
         return event;
     }
     if ([_buttonParseBlacklist containsObject:@(buttonNumber)]) return event;
