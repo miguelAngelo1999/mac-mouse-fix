@@ -613,5 +613,14 @@ import CocoaLumberjackSwift
         
         ToastNotificationController.attachNotification(withMessage: message, to: MainAppState.shared.window!, forDuration: kMFToastDurationAutomatic)
     }
-    /// rightMouseUp is intentionally NOT overridden — right click (button 2) can be captured as a trigger
+    override func rightMouseUp(with event: NSEvent) {
+        if !pointerIsInsideAddField { return }
+        
+        /// Right-click always passes through as a real context menu — it can't be configured
+        /// as a click action. It can only be used as a drag trigger.
+        let messageRaw = NSLocalizedString("forbidden-capture-toast.2", comment: "First draft: **Secondary Mouse Button** can't be used\nPlease try another button")
+        let message = NSAttributedString(coolMarkdown: messageRaw)!;
+        
+        ToastNotificationController.attachNotification(withMessage: message, to: MainAppState.shared.window!, forDuration: kMFToastDurationAutomatic)
+    }
 }

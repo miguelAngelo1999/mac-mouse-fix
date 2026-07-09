@@ -18,6 +18,7 @@
 #import "GestureScrollSimulator.h"
 #import "Mac_Mouse_Fix_Helper-Swift.h"
 #import "ModTapCoordinator.h"
+#import "ModifiedDrag.h"
 
 @implementation ButtonInputReceiver
 
@@ -201,6 +202,52 @@ static CGEventRef eventTapCallback(CGEventTapProxy proxy, CGEventType type, CGEv
 #if RECORDING_MODE
     return event;
 #endif
+    
+    /// Button 2 (right-click) — tap vs. drag decision.
+    /// Suppress the raw events while waiting to see if this becomes a drag.
+    /// On clean tap (no movement past drag threshold), re-inject from a private source
+    /// so context menus work. The private source ID lets us skip re-interception.
+    if (buttonNumber == 2) {
+        static CGEventRef sPendingRmbDown = nil;
+        static CGEventSourceRef sRmbEventSource = nil;
+        
+        /// Lazy-init private event source — events from this source skip our tap
+        if (!sRmbEventSource) {
+            sRmbEventSource = CGEventSourceCreate(kCGEventSourceStatePrivate);
+        }
+        
+        /// Check if this is our own re-injected synthetic event
+        CGEventSourceStateID sourceState = CGEventGetIntegerValueField(event, kCGEventSourceStateID);
+        if (sRmbEventSource && sourceState == CGEventSourceGetSourceStateID(sRmbEventSource)) {
+            return event; /// Our synthetic tap — pass through unchanged
+        }
+        
+        if (mouseDown) {
+            /// Suppress and save
+            if (sPendingRmbDown) { CFRelease(sPendingRmbDown); sPendingRmbDown = nil; }
+            sPendingRmbDown = CGEventCreateCopy(event);
+            return nil;
+        } else {
+            /// On release — decide tap vs drag
+            CGEventRef down = sPendingRmbDown;
+            sPendingRmbDown = nil;
+            
+            BOOL wasDrag = [ModifiedDrag isInUse];
+            
+            if (!wasDrag && down != nil && sRmbEventSource) {
+                /// Was a tap — post synthetic down+up from private source
+                CGPoint loc = CGEventGetLocation(event);
+                CGEventRef synDown = CGEventCreateMouseEvent(sRmbEventSource, kCGEventRightMouseDown, loc, kCGMouseButtonRight);
+                CGEventRef synUp   = CGEventCreateMouseEvent(sRmbEventSource, kCGEventRightMouseUp,   loc, kCGMouseButtonRight);
+                CGEventPost(kCGHIDEventTap, synDown);
+                CGEventPost(kCGHIDEventTap, synUp);
+                CFRelease(synDown);
+                CFRelease(synUp);
+            }
+            if (down) CFRelease(down);
+            return nil; /// Always suppress original; synthetic already posted if needed
+        }
+    }
     
     /// Let events pass through
     if (eval == kMFEventPassThroughRefusal) {
